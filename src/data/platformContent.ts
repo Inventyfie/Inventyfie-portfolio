@@ -147,6 +147,7 @@ export interface TutorialArticle {
   subtitle: string;
   summary: string;
   video: string;
+  thumbnail: string;
   sections: Array<{
     title: string;
     paragraphs: string[];
@@ -693,6 +694,7 @@ export const TUTORIAL_ARTICLES: TutorialArticle[] = [
     subtitle: 'Explained in a 10-second animation',
     summary: 'Temperature scales the model’s token scores before softmax converts them into probabilities. Lower temperature creates sharper probabilities and more predictable choices. With top-p fixed at 90%, the eligible token set shrinks from 5 to 3 to 1.',
     video: '/llm_temperature_10s.mp4',
+    thumbnail: '/llm-temperature-thumbnail.png',
     sections: [
       {
         title: 'Start with the next-token prediction',

@@ -238,7 +238,7 @@ function TutorialDetail({ tutorial }: { tutorial: TutorialArticle }) {
         </div>
 
         <figure className="mb-14 overflow-hidden rounded-3xl border border-white/10 bg-black/30 shadow-2xl">
-          <video className="aspect-video w-full" controls preload="metadata" poster="/favicon.svg">
+          <video className="aspect-video w-full" controls preload="metadata" poster={tutorial.thumbnail}>
             <source src={tutorial.video} type="video/mp4" />
             Your browser does not support the tutorial video.
           </video>
@@ -694,6 +694,7 @@ export default function App() {
               <div className="grid gap-6 lg:grid-cols-3">
                 <article className="theme-card-hover glass rounded-3xl border border-neon-cyan/30 p-6 lg:col-span-3">
                   <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                    <img src="/llm-temperature-thumbnail.png" alt="How LLM Temperature Works thumbnail" className="aspect-video w-full rounded-2xl border border-white/10 object-cover md:order-2 md:max-w-sm" />
                     <div className="max-w-3xl">
                       <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">Featured animation · 10 sec</p>
                       <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How LLM Temperature Works 🌡️</h3>
