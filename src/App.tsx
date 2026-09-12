@@ -34,6 +34,8 @@ import {
   RESEARCH_JOURNAL,
   RESEARCH_LIBRARY_CATEGORIES,
   RESOURCE_ITEMS,
+  TUTORIAL_ARTICLES,
+  TutorialArticle,
 } from './data/platformContent';
 import { MetadataStrip } from './components/MetadataStrip';
 import { SearchDocument, SearchExplorer } from './components/SearchExplorer';
@@ -221,9 +223,50 @@ function sectionSchema() {
 
 const sectionTitleClass = 'theme-text-primary mb-4 font-display text-4xl font-bold md:text-6xl text-slate-900 dark:text-white';
 
+function TutorialDetail({ tutorial }: { tutorial: TutorialArticle }) {
+  return (
+    <Section id="tutorial-detail" className="min-h-screen px-6 pb-24 pt-32">
+      <div className="mx-auto max-w-5xl">
+        <a href="#tutorial" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-neon-cyan hover:underline">
+          <ArrowRight size={16} className="rotate-180" /> Back to tutorials
+        </a>
+        <div className="mb-10 max-w-3xl">
+          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Tutorial / Sampling controls</p>
+          <h1 className="theme-text-primary mb-3 font-display text-4xl font-bold md:text-6xl">{tutorial.title}</h1>
+          <p className="mb-6 text-lg text-neon-cyan">{tutorial.subtitle}</p>
+          <p className="theme-text-secondary text-lg leading-relaxed">{tutorial.summary}</p>
+        </div>
+
+        <figure className="mb-14 overflow-hidden rounded-3xl border border-white/10 bg-black/30 shadow-2xl">
+          <video className="aspect-video w-full" controls preload="metadata" poster="/favicon.svg">
+            <source src={tutorial.video} type="video/mp4" />
+            Your browser does not support the tutorial video.
+          </video>
+          <figcaption className="border-t border-white/10 px-5 py-3 text-xs text-slate-500 dark:text-white/45">Temperature changes the distribution; top-p changes the eligible set.</figcaption>
+        </figure>
+
+        <article className="glass rounded-3xl border border-white/10 p-6 md:p-10">
+          <div className="space-y-9">
+            {tutorial.sections.map((section) => (
+              <section key={section.title}>
+                <h2 className="theme-text-primary mb-3 font-display text-2xl font-bold">{section.title}</h2>
+                <div className="space-y-3">
+                  {section.paragraphs.map((paragraph) => <p key={paragraph} className="theme-text-secondary leading-relaxed">{paragraph}</p>)}
+                </div>
+                {section.bullets ? <ul className="mt-4 list-disc space-y-2 pl-5 text-slate-700 dark:text-white/70">{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}
+              </section>
+            ))}
+          </div>
+        </article>
+      </div>
+    </Section>
+  );
+}
+
 export default function App() {
   const [backgroundThemeIndex, setBackgroundThemeIndex] = useState(0);
   const [cmsEntries, setCmsEntries] = useState<CmsEntry[]>(() => loadCmsEntries());
+  const [activeTutorialId, setActiveTutorialId] = useState<string | null>(() => window.location.hash.startsWith('#tutorial/') ? window.location.hash.slice('#tutorial/'.length) : null);
 
   const chooseRandomThemeIndex = useCallback((current: number) => {
     if (BACKGROUND_THEMES.length < 2) {
@@ -259,6 +302,12 @@ export default function App() {
   useEffect(() => {
     saveCmsEntries(cmsEntries);
   }, [cmsEntries]);
+
+  useEffect(() => {
+    const handleHashChange = () => setActiveTutorialId(window.location.hash.startsWith('#tutorial/') ? window.location.hash.slice('#tutorial/'.length) : null);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     const siteUrl = import.meta.env.VITE_SITE_URL || 'https://inventyfie.com';
@@ -313,6 +362,7 @@ export default function App() {
 
   const activeBackgroundTheme = BACKGROUND_THEMES[backgroundThemeIndex] ?? BACKGROUND_THEMES[0];
   const heroInvestigation = RESEARCH_INVESTIGATIONS[0];
+  const activeTutorial = TUTORIAL_ARTICLES.find((tutorial) => tutorial.id === activeTutorialId);
 
   const searchDocs = useMemo<SearchDocument[]>(() => {
     const docs: SearchDocument[] = [];
@@ -512,6 +562,7 @@ export default function App() {
         />
 
         <main className="relative z-10">
+          {activeTutorial ? <TutorialDetail tutorial={activeTutorial} /> : <>
           <section id="home" className="flex min-h-screen flex-col items-center justify-center px-6 pt-20 text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -641,6 +692,20 @@ export default function App() {
               </div>
 
               <div className="grid gap-6 lg:grid-cols-3">
+                <article className="theme-card-hover glass rounded-3xl border border-neon-cyan/30 p-6 lg:col-span-3">
+                  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                    <div className="max-w-3xl">
+                      <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">Featured animation · 10 sec</p>
+                      <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How LLM Temperature Works 🌡️</h3>
+                      <p className="mb-4 text-sm leading-relaxed text-slate-700 dark:text-white/70">Temperature scales token scores before softmax. With top-p fixed at 90%, the eligible set shrinks from 5 → 3 → 1 as the distribution sharpens.</p>
+                      <a href="#tutorial/llm-temperature" className="inline-flex items-center gap-2 font-semibold text-neon-cyan hover:underline">Read the explanation <ArrowRight size={16} /></a>
+                    </div>
+                    <div className="shrink-0 rounded-2xl border border-neon-cyan/20 bg-neon-cyan/10 px-5 py-4 text-center">
+                      <span className="block text-3xl font-bold text-neon-cyan">5 → 3 → 1</span>
+                      <span className="text-xs uppercase tracking-widest text-slate-600 dark:text-white/55">eligible tokens</span>
+                    </div>
+                  </div>
+                </article>
                 <article className="glass rounded-3xl border border-white/10 p-6">
                   <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">01 · Read</p>
                   <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How to evaluate a research brief</h3>
@@ -1011,6 +1076,7 @@ export default function App() {
               </div>
             </div>
           </Section>
+          </>}
         </main>
 
         <footer className="theme-text-muted py-12 px-6 text-center text-slate-500 dark:text-white/30 border-t border-slate-300 dark:border-white/5">

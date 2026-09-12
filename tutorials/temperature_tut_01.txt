@@ -1,0 +1,138 @@
+# How LLM Temperature Actually Works — Explained Through a 10-Second Animation 🌡️
+You’ve probably heard: **“Lower temperature makes an LLM more predictable; higher temperature makes it more creative.”**
+
+But what actually happens inside the model?
+
+This 10-second animation shows the mathematics behind temperature—and how it interacts with **top-p sampling**. Here’s how to follow it, even if you’re new to LLMs.
+
+### 1. Start with the next-token prediction
+An LLM generates text one **token** at a time. A token can be a word, part of a word, or punctuation.
+
+For example, given:
+
+**“I drink a cup of…”**
+
+The model scores possible next tokens such as “tea” and “coffee.”
+
+At the beginning of the video, you see a simplified flow:
+
+**Input → Transformer / hidden states → Output scores**
+
+The transformer processes the context and produces a hidden-state vector—a numerical representation used to predict what comes next.
+
+### 2. Zoom into the output: meet the logits
+The video zooms into ten output nodes, labeled **A–J**. These represent a simplified vocabulary of ten possible next tokens.
+
+The numbers below them are **logits: raw scores before they become probabilities**.
+
+For example:
+
+- Token A: **3.0**
+- Token B: **2.5**
+- Token J: **−1.5**
+A higher logit means the model favors that token more.
+
+These scores come from combining the hidden-state vector with the output layer’s learned weights:
+
+**Logits = output weights × hidden-state vector + optional bias**
+
+Temperature does **not** change those learned weights.
+
+### 3. What does a negative logit mean?
+A negative logit does **not** mean a negative probability or an impossible token.
+
+What matters is the score **relative to the other scores**.
+
+For example, these two sets produce exactly the same softmax probabilities:
+
+**[3, 2, −1]**
+**[−2, −3, −6]**
+
+The second set simply subtracts five from every score. Their differences—and therefore their probabilities—remain unchanged.
+
+### 4. Temperature divides the logits
+Watch the temperature control on the right side of the video.
+
+The operation is:
+
+**Scaled logit = original logit ÷ temperature**
+
+At **T = 1.00**, the logits remain unchanged.
+
+At **T = 0.50**:
+
+- A: 3.0 ÷ 0.50 = **6.0**
+- B: 2.5 ÷ 0.50 = **5.0**
+- J: −1.5 ÷ 0.50 = **−3.0**
+Notice that the original scores stay fixed in the upper row. Only the scaled scores change.
+
+**Lower temperature widens the gaps between scores.**
+
+The gap between A and B increases from **0.5 to 1.0**. Negative scores become more negative, so it is more accurate to say that the gaps widen than that “all scores increase.”
+
+### 5. Softmax turns scores into probabilities
+The scaled scores then pass through **softmax**.
+
+Softmax takes the exponential of each scaled score and divides it by the sum of all those exponentials:
+
+**P(token i) = exp(zᵢ / T) ÷ Σ exp(zⱼ / T)**
+
+You don’t need to memorize the formula. The important idea is:
+
+**Softmax converts scores into positive probabilities that add up to 100%.**
+
+Because it uses exponentials, widening the score gaps gives the highest-scoring token a larger share of the probability.
+
+That is why bar A grows as temperature falls in the video.
+
+### 6. Follow the changing probability distribution
+The animation keeps the same original logits throughout, so you can isolate the effect of temperature.
+
+TemperatureToken A’s probabilityWhat you see**1.00****39.61%**Probability is spread across several tokens**0.50****63.21%**More probability concentrates on A**0.20****91.79%**A dominates the distribution**0.05****≈100%**Almost all probability concentrates on AThe tokens never change order. Temperature changes their probabilities, **not their ranking**.
+
+The chart’s vertical axis also stays fixed, so the changing bar heights represent real changes in probability.
+
+### 7. What does the green outline mean?
+The green outline shows **top-p sampling**, fixed at **0.90** throughout the video.
+
+Top-p keeps the smallest group of highest-probability tokens whose combined probability reaches or exceeds the chosen threshold.
+
+For **top-p = 0.90**, we add probabilities from the highest downward until the total reaches at least 90%.
+
+In this example:
+
+- **T = 1.00:** A–E are needed. Their combined probability is **92.4%** → **5 tokens**.
+- **T = 0.50:** A–C are enough. Their combined probability is **95.0%** → **3 tokens**.
+- **T = 0.20:** A alone has **91.8%** → **1 token**.
+That explains the shrinking green outline:
+
+**5 → 3 → 1 eligible tokens**
+
+The total can exceed 90% because we include whole tokens, not fractions of a token.
+
+The chart shows probabilities **before top-p filtering**. During sampling, the retained tokens’ probabilities are renormalized to sum to 100%.
+
+### 8. Does lower temperature make the answer deterministic?
+**Lower temperature generally makes sampling more predictable, but a positive temperature alone does not guarantee the same choice every time.**
+
+In this particular example, once top-p retains only A, sampling must select A for that prediction step.
+
+Temperature zero is commonly handled as **greedy decoding**: select the highest-scoring token directly. It is not implemented by literally dividing by zero.
+
+The animation stops at **0.05** to show the distribution approaching that behavior.
+
+### 9. What about higher temperature and top-k?
+**Higher temperature** narrows the scaled-score gaps, creating a flatter probability distribution. Lower-ranked tokens receive more probability, allowing more varied choices—but not necessarily better or more accurate ones.
+
+**Top-k** keeps a fixed number of highest-ranked tokens. Unlike top-p, its candidate count does not shrink when temperature decreases, because temperature preserves the ranking.
+
+For example, with **top-k = 5**, the same five highest-ranked tokens remain candidates; temperature changes how strongly sampling favors the leader.
+
+### The idea to remember
+**Temperature controls how concentrated the probabilities are. Top-p controls which tokens remain eligible for sampling.**
+
+In the video, lowering temperature makes one token increasingly dominant, so fewer tokens are needed to reach the same 90% threshold.
+
+This process repeats at each generation step as the context changes. Temperature is a sampling control—not a measure of the model’s knowledge, intelligence, or factual accuracy.
+
+#GenerativeAI #LLM #Temperature #TopP #MachineLearning #AIExplained

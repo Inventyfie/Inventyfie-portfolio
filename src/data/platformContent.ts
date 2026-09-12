@@ -141,6 +141,19 @@ export interface CmsEntry {
   createdAt: string;
 }
 
+export interface TutorialArticle {
+  id: string;
+  title: string;
+  subtitle: string;
+  summary: string;
+  video: string;
+  sections: Array<{
+    title: string;
+    paragraphs: string[];
+    bullets?: string[];
+  }>;
+}
+
 const baseMetadata = {
   author: 'Inventyfie Research Lab',
   version: '1.0.0',
@@ -671,4 +684,86 @@ export const FUTURE_MODULES = [
   'Newsletter',
   'Annual Reports',
   'Interactive Benchmarks',
+];
+
+export const TUTORIAL_ARTICLES: TutorialArticle[] = [
+  {
+    id: 'llm-temperature',
+    title: 'How LLM Temperature Works 🌡️',
+    subtitle: 'Explained in a 10-second animation',
+    summary: 'Temperature scales the model’s token scores before softmax converts them into probabilities. Lower temperature creates sharper probabilities and more predictable choices. With top-p fixed at 90%, the eligible token set shrinks from 5 to 3 to 1.',
+    video: '/llm_temperature_10s.mp4',
+    sections: [
+      {
+        title: 'Start with the next-token prediction',
+        paragraphs: [
+          'An LLM generates text one token at a time. A token can be a word, part of a word, or punctuation. Given “I drink a cup of…”, the model scores possible next tokens such as “tea” and “coffee”.',
+          'The transformer processes the context and produces a hidden-state vector, a numerical representation used to predict what comes next.',
+        ],
+      },
+      {
+        title: 'Meet the logits',
+        paragraphs: [
+          'The animation zooms into ten output nodes labeled A–J. These are a simplified vocabulary of possible next tokens. The numbers below them are logits: raw scores before they become probabilities.',
+          'A higher logit means the model favors that token more. Logits come from combining the hidden-state vector with the output layer’s learned weights. Temperature does not change those learned weights.',
+        ],
+        bullets: ['Token A: 3.0', 'Token B: 2.5', 'Token J: −1.5', 'Logits = output weights × hidden-state vector + optional bias'],
+      },
+      {
+        title: 'Negative logits are still valid',
+        paragraphs: [
+          'A negative logit does not mean a negative probability or an impossible token. What matters is each score relative to the others.',
+          'The score sets [3, 2, −1] and [−2, −3, −6] produce exactly the same softmax probabilities. The second set simply subtracts five from every score, preserving all differences.',
+        ],
+      },
+      {
+        title: 'Temperature divides the logits',
+        paragraphs: [
+          'The operation is scaled logit = original logit ÷ temperature. At T = 1.00, logits remain unchanged. At T = 0.50, A becomes 6.0, B becomes 5.0, and J becomes −3.0.',
+          'Lower temperature widens the gaps between scores. It is more accurate to say the gaps widen than that all scores increase, because negative scores become more negative too.',
+        ],
+      },
+      {
+        title: 'Softmax creates the probability distribution',
+        paragraphs: [
+          'Softmax takes the exponential of each scaled score and divides it by the sum of all exponentials: P(token i) = exp(zᵢ / T) ÷ Σ exp(zⱼ / T). The result is a set of positive probabilities that add up to 100%.',
+          'Because exponentials amplify score differences, widening the gaps gives the highest-scoring token a larger share of the probability.',
+        ],
+      },
+      {
+        title: 'Follow the distribution',
+        paragraphs: ['The animation keeps the original logits fixed so the effect of temperature is easy to isolate. The tokens never change order; temperature changes their probabilities, not their ranking.'],
+        bullets: ['T = 1.00: Token A has 39.61%; probability is spread across several tokens.', 'T = 0.50: Token A has 63.21%; more probability concentrates on A.', 'T = 0.20: Token A has 91.79%; A dominates the distribution.', 'T = 0.05: almost 100% concentrates on A.'],
+      },
+      {
+        title: 'Top-p sampling: 5 → 3 → 1',
+        paragraphs: [
+          'The green outline shows top-p sampling, fixed at 0.90. Top-p keeps the smallest group of highest-probability tokens whose combined probability reaches or exceeds the threshold.',
+          'The chart shows probabilities before top-p filtering. During sampling, the retained tokens are renormalized to sum to 100%. The total can exceed 90% because whole tokens are included, not fractions of a token.',
+        ],
+        bullets: ['T = 1.00: A–E are needed; together they total 92.4%.', 'T = 0.50: A–C are enough; together they total 95.0%.', 'T = 0.20: A alone reaches 91.8%.'],
+      },
+      {
+        title: 'Does low temperature make output deterministic?',
+        paragraphs: [
+          'Lower temperature generally makes sampling more predictable, but a positive temperature does not guarantee the same choice every time. In this example, top-p eventually retains only A, so that prediction step must select A.',
+          'Temperature zero is commonly handled as greedy decoding: select the highest-scoring token directly. It is not implemented by literally dividing by zero.',
+        ],
+      },
+      {
+        title: 'Temperature, top-p, and top-k',
+        paragraphs: [
+          'Higher temperature narrows the scaled-score gaps, creating a flatter distribution. Lower-ranked tokens receive more probability, allowing more varied choices, but not necessarily better or more accurate ones.',
+          'Top-k keeps a fixed number of highest-ranked tokens. With top-k = 5, the same five tokens remain candidates at every temperature because temperature preserves the ranking.',
+        ],
+      },
+      {
+        title: 'The idea to remember',
+        paragraphs: [
+          'Temperature controls how concentrated the probabilities are. Top-p controls which tokens remain eligible for sampling.',
+          'This process repeats at each generation step as the context changes. Temperature is a sampling control, not a measure of the model’s knowledge, intelligence, factual accuracy, or learned weights.',
+        ],
+      },
+    ],
+  },
 ];
