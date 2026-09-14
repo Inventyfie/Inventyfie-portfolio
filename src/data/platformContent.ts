@@ -161,18 +161,11 @@ const baseMetadata = {
 };
 
 export const NAV_LINKS = [
-  { name: 'Home', href: '#home' },
   { name: 'Research', href: '#research' },
-  { name: 'Tutorial', href: '#tutorial' },
   { name: 'Engineering', href: '#engineering' },
   { name: 'Case Studies', href: '#case-studies' },
-  { name: 'Benchmarks', href: '#benchmarks' },
-  { name: 'Decision Frameworks', href: '#decision-frameworks' },
-  { name: 'Research Library', href: '#research-library' },
-  { name: 'Open Source', href: '#open-source' },
-  { name: 'Resources', href: '#resources' },
   { name: 'About', href: '#about' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Contact', href: 'mailto:inventyfie@gmail.com?subject=Inventyfie%20Enquiry' },
 ];
 
 export const RESEARCH_INVESTIGATIONS: ResearchInvestigation[] = [
@@ -652,8 +645,8 @@ export const CASE_STUDY_INDUSTRIES = [
 ];
 
 export const ABOUT_CONTENT = {
-  mission: 'Inventyfie exists to publish practical AI engineering research that improves real technology decisions in production environments.',
-  vision: 'Become the most trusted AI Engineering Research Institute for architects, managers, and enterprise engineering teams.',
+  mission: 'Inventyfie is an AI engineering research platform for practical investigation, production-grade engineering, benchmarks, and real-world case studies.',
+  vision: 'We explore how modern AI systems behave in practice, identify engineering trade-offs, and turn findings into clear, reproducible insights for developers, engineers, researchers, and learners.',
   researchPrinciples: [
     'Evidence before opinion',
     'Reproducible methodology',
@@ -666,8 +659,8 @@ export const ABOUT_CONTENT = {
     'Performance and cost measured continuously',
     'Decision quality is a product feature',
   ],
-  publicationPhilosophy: 'Every publication must answer a practical question and provide implementation-grade guidance.',
-  founderStory: 'Inventyfie began as a focused engineering effort to bridge the gap between AI hype and production reality through applied research.',
+  publicationPhilosophy: 'We cover Generative AI, large language models, RAG, agentic AI, architecture, evaluation, performance, reliability, and production implementation.',
+  founderStory: 'Our work is grounded in experimentation: building, testing, comparing, measuring, and documenting results—not simply explaining concepts.',
   roadmap: [
     'Q3: Interactive benchmark dashboards',
     'Q4: Semantic search and recommendation engine',

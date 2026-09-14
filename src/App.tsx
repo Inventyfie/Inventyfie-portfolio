@@ -558,7 +558,6 @@ export default function App() {
           }}
           onThemeChipClick={randomizeTheme}
           navLinks={NAV_LINKS}
-          primaryAction={{ label: 'Research', href: '#research' }}
         />
 
         <main className="relative z-10">
@@ -1051,11 +1050,11 @@ export default function App() {
 
               <div className="flex flex-col items-center gap-8">
                 <a
-                  href="mailto:inventyfie@gmail.com"
+                  href="mailto:inventyfie@gmail.com?subject=Inventyfie%20Enquiry"
                   className="theme-text-primary group flex items-center gap-4 text-2xl font-bold text-slate-900 dark:text-white hover:text-neon-cyan transition-colors md:text-4xl"
                 >
                   <Mail size={32} />
-                  contact@inventyfie.com
+                  inventyfie@gmail.com
                 </a>
 
                 <div className="flex gap-6">

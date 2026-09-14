@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { Terminal, Menu, X, ChevronDown } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { Terminal, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
 import { MascotWatcher } from './MascotWatcher';
 
@@ -13,14 +13,11 @@ interface NavbarProps {
   theme: NavbarThemeAccent;
   onThemeChipClick: () => void;
   navLinks: Array<{ name: string; href: string }>;
-  primaryAction: { label: string; href: string };
 }
 
-export const Navbar = ({ theme, onThemeChipClick, navLinks, primaryAction }: NavbarProps) => {
+export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const moreMenuRef = useRef<HTMLDivElement | null>(null);
 
   const handleThemeChipClick = () => {
     window.dispatchEvent(new CustomEvent('mascot-theme-changing'));
@@ -32,24 +29,6 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks, primaryAction }: Nav
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!moreMenuRef.current) {
-        return;
-      }
-      if (!moreMenuRef.current.contains(event.target as Node)) {
-        setIsMoreMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const desktopLinks = navLinks.filter((link) => link.name !== 'Home');
-  const visibleDesktopLinks = desktopLinks.slice(0, 6);
-  const overflowDesktopLinks = desktopLinks.slice(6);
 
   return (
     <nav
@@ -79,7 +58,7 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks, primaryAction }: Nav
         {/* Desktop Nav */}
         <div className="hidden md:flex md:flex-1 md:items-center md:justify-end">
           <div className="mr-4 flex items-center gap-5 lg:gap-6">
-            {visibleDesktopLinks.map((link) => (
+            {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
@@ -89,46 +68,9 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks, primaryAction }: Nav
               </a>
             ))}
 
-            {overflowDesktopLinks.length > 0 ? (
-              <div ref={moreMenuRef} className="relative">
-                <button
-                  onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                  className="nav-text theme-link-hover inline-flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-white/70"
-                >
-                  More
-                  <ChevronDown size={14} className={cn('transition-transform', isMoreMenuOpen && 'rotate-180')} />
-                </button>
-
-                {isMoreMenuOpen ? (
-                  <div className="glass nav-surface absolute right-0 top-8 z-50 min-w-[180px] rounded-2xl border border-white/10 p-2">
-                    {overflowDesktopLinks.map((link) => (
-                      <a
-                        key={link.name}
-                        href={link.href}
-                        onClick={() => setIsMoreMenuOpen(false)}
-                        className="nav-text theme-link-hover block rounded-xl px-3 py-2 text-sm font-medium text-slate-700 dark:text-white/70 hover:bg-white/10 dark:hover:bg-white/10"
-                      >
-                        {link.name}
-                      </a>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
           </div>
           <div className="relative flex items-center gap-3 justify-end">
             <MascotWatcher />
-            <motion.a
-              href={primaryAction.href}
-              whileTap={{ scale: 0.98 }}
-              className="accent-button h-10 w-[124px] rounded-full px-6 py-2 text-sm font-bold text-white transition-all duration-[3200ms] ease-in-out hover:brightness-110"
-              style={{
-                backgroundImage: 'linear-gradient(120deg, var(--theme-button-from), var(--theme-button-to))',
-                boxShadow: '0 0 18px var(--theme-button-glow)',
-              }}
-            >
-              {primaryAction.label}
-            </motion.a>
             <div className="relative h-8 w-[152px] shrink-0">
               <AnimatePresence mode="sync">
                 <motion.button
@@ -176,19 +118,6 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks, primaryAction }: Nav
             ))}
             <div className="flex items-end justify-between gap-4">
               <MascotWatcher />
-              <button
-                onClick={() => {
-                  window.location.hash = primaryAction.href;
-                  setIsMobileMenuOpen(false);
-                }}
-                className="accent-button w-full rounded-xl py-3 font-bold text-white transition-all duration-[3200ms] ease-in-out"
-                style={{
-                  backgroundImage: 'linear-gradient(120deg, var(--theme-button-from), var(--theme-button-to))',
-                  boxShadow: '0 0 16px var(--theme-button-glow)',
-                }}
-              >
-                {primaryAction.label}
-              </button>
             </div>
           </div>
         </motion.div>
