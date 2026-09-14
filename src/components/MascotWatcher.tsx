@@ -15,9 +15,6 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
   mode = 'idle',
   onOpenSummary,
 }) => {
-  const [leftEyePos, setLeftEyePos] = useState({x: 0, y: 0});
-  const [rightEyePos, setRightEyePos] = useState({x: 0, y: 0});
-
   const targetPos = useRef({x: 0, y: 0});
   const currentPos = useRef({x: 0, y: 0});
   const lastMousePosRef = useRef({x: 0, y: 0});
@@ -32,6 +29,10 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
   const hopResetRef = useRef<number | null>(null);
   const returnResetRef = useRef<number | null>(null);
   const speechTimeoutRef = useRef<number | null>(null);
+  const noteTimeoutsRef = useRef<number[]>([]);
+  const blinkTimeoutRef = useRef<number | null>(null);
+  const leftEyeRef = useRef<SVGGElement>(null);
+  const rightEyeRef = useRef<SVGGElement>(null);
   const lastNoteAtRef = useRef<number>(0);
 
   const [isBlinking, setIsBlinking] = useState(false);
@@ -79,9 +80,11 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
       speechTimeoutRef.current = null;
     }, 3400);
 
-    window.setTimeout(() => {
+    const noteTimeout = window.setTimeout(() => {
       setNotes((prev) => prev.filter((n) => n.id !== id));
+      noteTimeoutsRef.current = noteTimeoutsRef.current.filter((timeout) => timeout !== noteTimeout);
     }, 3800);
+    noteTimeoutsRef.current.push(noteTimeout);
   }, []);
 
   useEffect(() => {
@@ -134,11 +137,8 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
       const distProjected = Math.hypot(dxProjected, dyProjected);
       const pointerIsActive = hasPointerMovedRef.current;
 
-      if (!pointerIsActive) {
-        setIsNear(false);
-      }
-
-      setIsNear(pointerIsActive && Math.min(distRaw, distProjected) < 340);
+      const nextIsNear = pointerIsActive && Math.min(distRaw, distProjected) < 340;
+      setIsNear((previous) => (previous === nextIsNear ? previous : nextIsNear));
 
       const cursorSpeed = Math.hypot(cursorVelocityRef.current.x, cursorVelocityRef.current.y);
       const movedSinceLastDodge =
@@ -211,11 +211,21 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
         };
       };
 
-      setLeftEyePos(calculateEyeOffset(35, 40));
-      setRightEyePos(calculateEyeOffset(65, 40));
+      const leftEyeOffset = calculateEyeOffset(35, 40);
+      const rightEyeOffset = calculateEyeOffset(65, 40);
+      if (leftEyeRef.current) {
+        leftEyeRef.current.style.transform = `translate(${leftEyeOffset.x}px, ${leftEyeOffset.y}px)`;
+      }
+      if (rightEyeRef.current) {
+        rightEyeRef.current.style.transform = `translate(${rightEyeOffset.x}px, ${rightEyeOffset.y}px)`;
+      }
 
       requestRef.current = window.requestAnimationFrame(animateEyes);
     };
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
 
     window.addEventListener('mousemove', handleMouseMove);
     requestRef.current = window.requestAnimationFrame(animateEyes);
@@ -235,6 +245,8 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
       if (speechTimeoutRef.current !== null) {
         window.clearTimeout(speechTimeoutRef.current);
       }
+      noteTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      noteTimeoutsRef.current = [];
     };
   }, [mode, spawnFloatingNote]);
 
@@ -255,10 +267,18 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
   useEffect(() => {
     const blinkInterval = window.setInterval(() => {
       setIsBlinking(true);
-      window.setTimeout(() => setIsBlinking(false), 200);
+      blinkTimeoutRef.current = window.setTimeout(() => {
+        setIsBlinking(false);
+        blinkTimeoutRef.current = null;
+      }, 200);
     }, 4000);
 
-    return () => window.clearInterval(blinkInterval);
+    return () => {
+      window.clearInterval(blinkInterval);
+      if (blinkTimeoutRef.current !== null) {
+        window.clearTimeout(blinkTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -540,11 +560,11 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
             </g>
 
             <g>
-              <g style={{transform: `translate(${leftEyePos.x}px, ${leftEyePos.y}px)`}}>
+              <g ref={leftEyeRef}>
                 <circle cx="35" cy="40" r="4.5" fill="#000" />
                 <circle cx="37" cy="38" r="1.5" fill="white" opacity="0.9" />
               </g>
-              <g style={{transform: `translate(${rightEyePos.x}px, ${rightEyePos.y}px)`}}>
+              <g ref={rightEyeRef}>
                 <circle cx="65" cy="40" r="4.5" fill="#000" />
                 <circle cx="67" cy="38" r="1.5" fill="white" opacity="0.9" />
               </g>

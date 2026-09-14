@@ -162,13 +162,25 @@ const baseMetadata = {
 
 export const NAV_LINKS = [
   { name: 'Research', href: '#research' },
+  { name: 'Tutorial', href: '#tutorial' },
   { name: 'Engineering', href: '#engineering' },
   { name: 'Case Studies', href: '#case-studies' },
   { name: 'About', href: '#about' },
-  { name: 'Contact', href: 'mailto:inventyfie@gmail.com?subject=Inventyfie%20Enquiry' },
+  { name: 'Contact', href: '#contact' },
 ];
 
-export const RESEARCH_INVESTIGATIONS: ResearchInvestigation[] = [
+export const RESEARCH_INVESTIGATIONS: ResearchInvestigation[] = [];
+export const ENGINEERING_PROJECTS: EngineeringProject[] = [];
+export const CASE_STUDIES: CaseStudy[] = [];
+export const BENCHMARK_STUDIES: BenchmarkStudy[] = [];
+export const DECISION_FRAMEWORKS: DecisionFramework[] = [];
+export const RESEARCH_LIBRARY_CATEGORIES: string[] = [];
+export const RESEARCH_JOURNAL: JournalEntry[] = [];
+export const RESOURCE_ITEMS: ResourceItem[] = [];
+export const CASE_STUDY_INDUSTRIES: string[] = [];
+export const FUTURE_MODULES: string[] = [];
+
+const AUTO_GENERATED_RESEARCH_INVESTIGATIONS: ResearchInvestigation[] = [
   {
     id: 'rag-long-context',
     title: 'RAG vs Long-Context LLMs for Industrial Diagnostics',
@@ -268,7 +280,7 @@ export const RESEARCH_INVESTIGATIONS: ResearchInvestigation[] = [
   },
 ];
 
-export const ENGINEERING_PROJECTS: EngineeringProject[] = [
+const AUTO_GENERATED_ENGINEERING_PROJECTS: EngineeringProject[] = [
   {
     id: 'factory-copilot',
     title: 'Factory Copilot Platform',
@@ -329,7 +341,7 @@ export const ENGINEERING_PROJECTS: EngineeringProject[] = [
   },
 ];
 
-export const CASE_STUDIES: CaseStudy[] = [
+const AUTO_GENERATED_CASE_STUDIES: CaseStudy[] = [
   {
     id: 'retail-demand-signal',
     title: 'Retail Demand Signal Intelligence',
@@ -384,7 +396,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   },
 ];
 
-export const BENCHMARK_STUDIES: BenchmarkStudy[] = [
+const AUTO_GENERATED_BENCHMARK_STUDIES: BenchmarkStudy[] = [
   {
     id: 'embedding-models-2026',
     title: 'Embedding Models for Technical Knowledge Retrieval',
@@ -433,7 +445,7 @@ export const BENCHMARK_STUDIES: BenchmarkStudy[] = [
   },
 ];
 
-export const DECISION_FRAMEWORKS: DecisionFramework[] = [
+const AUTO_GENERATED_DECISION_FRAMEWORKS: DecisionFramework[] = [
   {
     id: 'should-i-use-rag',
     title: 'Should I Use RAG?',
@@ -488,7 +500,7 @@ export const DECISION_FRAMEWORKS: DecisionFramework[] = [
   },
 ];
 
-export const RESEARCH_LIBRARY_CATEGORIES = [
+const AUTO_GENERATED_RESEARCH_LIBRARY_CATEGORIES = [
   'Artificial Intelligence',
   'Machine Learning',
   'Generative AI',
@@ -513,7 +525,7 @@ export const RESEARCH_LIBRARY_CATEGORIES = [
   'Decision Science',
 ];
 
-export const RESEARCH_JOURNAL: JournalEntry[] = [
+const AUTO_GENERATED_RESEARCH_JOURNAL: JournalEntry[] = [
   {
     id: 'journal-2026-07-06',
     date: '2026-07-06',
@@ -552,46 +564,7 @@ export const RESEARCH_JOURNAL: JournalEntry[] = [
   },
 ];
 
-export const OPEN_SOURCE_ITEMS: OpenSourceItem[] = [
-  {
-    id: 'opensource-eval-harness',
-    title: 'Inventyfie Eval Harness',
-    kind: 'Research Tool',
-    summary: 'Reusable framework for groundedness, factuality, and latency evaluation in LLM workflows.',
-    link: 'https://github.com/inventyfie/eval-harness',
-    metadata: {
-      ...baseMetadata,
-      difficulty: 'Intermediate',
-      industry: 'Cross-Industry',
-      technology: ['Evaluation', 'LLMs'],
-      estimatedReadingTime: 6,
-      businessDomain: 'AI Quality',
-      researchStatus: 'Published',
-      updatedDate: '2026-06-29',
-      tags: ['Open Source', 'Evaluation'],
-    },
-  },
-  {
-    id: 'opensource-rag-template',
-    title: 'Enterprise RAG Starter Template',
-    kind: 'Template',
-    summary: 'Production-ready starter for secure retrieval pipelines, policy checks, and observability.',
-    link: 'https://github.com/inventyfie/enterprise-rag-template',
-    metadata: {
-      ...baseMetadata,
-      difficulty: 'Intermediate',
-      industry: 'Cross-Industry',
-      technology: ['RAG', 'Security', 'MLOps'],
-      estimatedReadingTime: 7,
-      businessDomain: 'Platform Engineering',
-      researchStatus: 'Published',
-      updatedDate: '2026-07-01',
-      tags: ['Open Source', 'Template', 'RAG'],
-    },
-  },
-];
-
-export const RESOURCE_ITEMS: ResourceItem[] = [
+const AUTO_GENERATED_RESOURCE_ITEMS: ResourceItem[] = [
   {
     id: 'resource-genai-systems',
     title: 'Designing Generative AI Systems',
@@ -630,7 +603,7 @@ export const RESOURCE_ITEMS: ResourceItem[] = [
   },
 ];
 
-export const CASE_STUDY_INDUSTRIES = [
+const AUTO_GENERATED_CASE_STUDY_INDUSTRIES = [
   'Manufacturing',
   'Healthcare',
   'Finance',
@@ -645,8 +618,8 @@ export const CASE_STUDY_INDUSTRIES = [
 ];
 
 export const ABOUT_CONTENT = {
-  mission: 'Inventyfie is an AI engineering research platform for practical investigation, production-grade engineering, benchmarks, and real-world case studies.',
-  vision: 'We explore how modern AI systems behave in practice, identify engineering trade-offs, and turn findings into clear, reproducible insights for developers, engineers, researchers, and learners.',
+  mission: 'We help teams turn AI ambition into an actionable adoption plan: choosing the right use cases, shaping the architecture, evaluating vendors, and preparing reliable workflows for production.',
+  vision: 'Inventyfie is building a practical AI decision partner where research, benchmarks, and implementation guidance make complex technology choices clearer, faster, and easier to defend.',
   researchPrinciples: [
     'Evidence before opinion',
     'Reproducible methodology',
@@ -659,16 +632,16 @@ export const ABOUT_CONTENT = {
     'Performance and cost measured continuously',
     'Decision quality is a product feature',
   ],
-  publicationPhilosophy: 'We cover Generative AI, large language models, RAG, agentic AI, architecture, evaluation, performance, reliability, and production implementation.',
-  founderStory: 'Our work is grounded in experimentation: building, testing, comparing, measuring, and documenting results—not simply explaining concepts.',
+  publicationPhilosophy: 'We turn fast-moving AI ideas into useful guidance through focused experiments, honest comparisons, and implementation-ready recommendations.',
+  founderStory: 'Our next chapter is focused on richer benchmark dashboards, decision tools, and consultation pathways that help teams move from curiosity to confident execution.',
   roadmap: [
-    'Q3: Interactive benchmark dashboards',
-    'Q4: Semantic search and recommendation engine',
-    'Q1: Community research submissions and annual report',
+    'Interactive benchmark dashboards for sharper technology decisions',
+    'AI adoption playbooks tailored to real operational constraints',
+    'Consultation pathways for architecture, evaluation, and rollout planning',
   ],
 };
 
-export const FUTURE_MODULES = [
+const AUTO_GENERATED_FUTURE_MODULES = [
   'Semantic Search',
   'AI Chat Assistant',
   'Research Recommendation Engine',

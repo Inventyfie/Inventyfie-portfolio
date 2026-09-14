@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createPortal } from 'react-dom';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -14,6 +15,7 @@ import {
   Linkedin,
   Mail,
   Twitter,
+  X,
   Zap,
 } from 'lucide-react';
 import { Navbar } from './components/Navbar';
@@ -21,19 +23,12 @@ import { Section } from './components/Section';
 import { ThemeProvider } from './contexts/ThemeContext';
 import {
   ABOUT_CONTENT,
-  BENCHMARK_STUDIES,
   CASE_STUDIES,
   CASE_STUDY_INDUSTRIES,
   CmsEntry,
-  DECISION_FRAMEWORKS,
   ENGINEERING_PROJECTS,
-  FUTURE_MODULES,
   NAV_LINKS,
-  OPEN_SOURCE_ITEMS,
   RESEARCH_INVESTIGATIONS,
-  RESEARCH_JOURNAL,
-  RESEARCH_LIBRARY_CATEGORIES,
-  RESOURCE_ITEMS,
   TUTORIAL_ARTICLES,
   TutorialArticle,
 } from './data/platformContent';
@@ -41,8 +36,16 @@ import { MetadataStrip } from './components/MetadataStrip';
 import { SearchDocument, SearchExplorer } from './components/SearchExplorer';
 import { loadCmsEntries, saveCmsEntries } from './lib/cms';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
+import { EnterpriseRagArticle, EnterpriseRagCard } from './components/EnterpriseRagArticle';
+import enterpriseRagArticle from './Engineering/data/enterprise-rag-technical-knowledge.json';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel').then((mod) => ({ default: mod.AdminPanel })));
+
+const EmptyState = () => (
+  <div className="glass rounded-3xl border border-white/10 p-8 text-center text-sm text-slate-600 dark:text-white/60">
+    Data will be added soon.
+  </div>
+);
 
 type BackgroundTheme = {
   id: string;
@@ -223,13 +226,31 @@ function sectionSchema() {
 
 const sectionTitleClass = 'theme-text-primary mb-4 font-display text-4xl font-bold md:text-6xl text-slate-900 dark:text-white';
 
-function TutorialDetail({ tutorial }: { tutorial: TutorialArticle }) {
+type PageId = 'home' | 'research' | 'tutorial' | 'engineering' | 'case-studies';
+
+const pageFromHash = (hash: string): PageId => {
+  if (hash.startsWith('#tutorial')) return 'tutorial';
+  if (hash === '#research') return 'research';
+  if (hash.startsWith('#engineering')) return 'engineering';
+  if (hash === '#case-studies') return 'case-studies';
+  return 'home';
+};
+
+const engineeringTopicFromHash = (hash: string) => hash.startsWith('#engineering/') ? hash.slice('#engineering/'.length) : null;
+
+function TutorialDetail({ tutorial, onClose }: { tutorial: TutorialArticle; onClose?: () => void }) {
   return (
     <Section id="tutorial-detail" className="min-h-screen px-6 pb-24 pt-32">
       <div className="mx-auto max-w-5xl">
-        <a href="#tutorial" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-neon-cyan hover:underline">
-          <ArrowRight size={16} className="rotate-180" /> Back to tutorials
-        </a>
+        {onClose ? (
+          <button type="button" onClick={onClose} className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-neon-cyan hover:underline">
+            <ArrowRight size={16} className="rotate-180" /> Back to tutorials
+          </button>
+        ) : (
+          <a href="#tutorial" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-neon-cyan hover:underline">
+            <ArrowRight size={16} className="rotate-180" /> Back to tutorials
+          </a>
+        )}
         <div className="mb-10 max-w-3xl">
           <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Tutorial / Sampling controls</p>
           <h1 className="theme-text-primary mb-3 font-display text-4xl font-bold md:text-6xl">{tutorial.title}</h1>
@@ -245,7 +266,7 @@ function TutorialDetail({ tutorial }: { tutorial: TutorialArticle }) {
           <figcaption className="border-t border-white/10 px-5 py-3 text-xs text-slate-500 dark:text-white/45">Temperature changes the distribution; top-p changes the eligible set.</figcaption>
         </figure>
 
-        <article className="glass rounded-3xl border border-white/10 p-6 md:p-10">
+        <article className="glass readable-surface rounded-3xl border border-white/10 p-6 md:p-10">
           <div className="space-y-9">
             {tutorial.sections.map((section) => (
               <section key={section.title}>
@@ -263,10 +284,50 @@ function TutorialDetail({ tutorial }: { tutorial: TutorialArticle }) {
   );
 }
 
+function TutorialCard({ tutorial }: { tutorial: TutorialArticle }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isOpen]);
+
+  return (
+    <>
+      <article className="theme-card-hover readable-surface overflow-hidden rounded-3xl border border-neon-cyan/25 p-6 md:p-8">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <img src={tutorial.thumbnail} alt={`${tutorial.title} thumbnail`} className="aspect-video w-full rounded-2xl border border-white/10 object-cover md:order-2 md:max-w-sm" />
+          <div className="max-w-3xl">
+            <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">Featured tutorial · 10 sec</p>
+            <h3 className="mb-3 font-display text-2xl font-bold text-white">{tutorial.title}</h3>
+            <p className="mb-4 text-sm leading-relaxed text-white/70">{tutorial.subtitle}</p>
+            <button type="button" onClick={() => setIsOpen(true)} className="accent-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white">Read tutorial <ArrowRight size={16} /></button>
+          </div>
+        </div>
+      </article>
+      {isOpen ? createPortal(
+        <div className="fixed inset-0 z-[100] bg-black/70 p-3 backdrop-blur-md md:p-8" role="dialog" aria-modal="true" aria-label="Tutorial reader" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsOpen(false); }}>
+          <div className="relative h-full overflow-y-auto rounded-3xl border border-white/20 bg-slate-950/95 shadow-2xl">
+            <button type="button" onClick={() => setIsOpen(false)} className="sticky right-5 top-5 z-20 ml-auto mr-5 mt-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/50 text-white hover:bg-white/15" aria-label="Close tutorial reader"><X size={20} /></button>
+            <TutorialDetail tutorial={tutorial} onClose={() => setIsOpen(false)} />
+          </div>
+        </div>,
+        document.body,
+      ) : null}
+    </>
+  );
+}
+
 export default function App() {
   const [backgroundThemeIndex, setBackgroundThemeIndex] = useState(0);
   const [cmsEntries, setCmsEntries] = useState<CmsEntry[]>(() => loadCmsEntries());
-  const [activeTutorialId, setActiveTutorialId] = useState<string | null>(() => window.location.hash.startsWith('#tutorial/') ? window.location.hash.slice('#tutorial/'.length) : null);
+  const [isAdminRoute, setIsAdminRoute] = useState(() => window.location.hash === '#admin');
+  const [activePage, setActivePage] = useState<PageId>(() => pageFromHash(window.location.hash));
+  const [activeEngineeringTopic, setActiveEngineeringTopic] = useState(() => engineeringTopicFromHash(window.location.hash));
 
   const chooseRandomThemeIndex = useCallback((current: number) => {
     if (BACKGROUND_THEMES.length < 2) {
@@ -304,10 +365,25 @@ export default function App() {
   }, [cmsEntries]);
 
   useEffect(() => {
-    const handleHashChange = () => setActiveTutorialId(window.location.hash.startsWith('#tutorial/') ? window.location.hash.slice('#tutorial/'.length) : null);
+    const handleHashChange = () => {
+      setIsAdminRoute(window.location.hash === '#admin');
+      setActivePage(pageFromHash(window.location.hash));
+      setActiveEngineeringTopic(engineeringTopicFromHash(window.location.hash));
+    };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    const targetId = hash === '#contact' || hash === '#about'
+      ? hash.slice(1)
+      : activePage;
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    });
+  }, [activePage, activeEngineeringTopic]);
 
   useEffect(() => {
     const siteUrl = import.meta.env.VITE_SITE_URL || 'https://inventyfie.com';
@@ -362,7 +438,6 @@ export default function App() {
 
   const activeBackgroundTheme = BACKGROUND_THEMES[backgroundThemeIndex] ?? BACKGROUND_THEMES[0];
   const heroInvestigation = RESEARCH_INVESTIGATIONS[0];
-  const activeTutorial = TUTORIAL_ARTICLES.find((tutorial) => tutorial.id === activeTutorialId);
 
   const searchDocs = useMemo<SearchDocument[]>(() => {
     const docs: SearchDocument[] = [];
@@ -403,52 +478,50 @@ export default function App() {
       });
     });
 
-    BENCHMARK_STUDIES.forEach((item) => {
+    TUTORIAL_ARTICLES.forEach((item) => {
       docs.push({
         id: item.id,
-        kind: 'Benchmarks',
-        title: item.title,
-        summary: item.finalRecommendation,
-        sectionHref: '#benchmarks',
-        metadata: item.metadata,
-        searchableContent: [item.dataset, item.environment, item.results.join(' '), item.metrics.join(' ')].join(' '),
-      });
-    });
-
-    DECISION_FRAMEWORKS.forEach((item) => {
-      docs.push({
-        id: item.id,
-        kind: 'Decision Frameworks',
-        title: item.title,
-        summary: item.recommendedArchitecture,
-        sectionHref: '#decision-frameworks',
-        metadata: item.metadata,
-        searchableContent: [item.businessConsiderations.join(' '), item.technicalConsiderations.join(' ')].join(' '),
-      });
-    });
-
-    OPEN_SOURCE_ITEMS.forEach((item) => {
-      docs.push({
-        id: item.id,
-        kind: 'Open Source',
+        kind: 'Tutorials',
         title: item.title,
         summary: item.summary,
-        sectionHref: '#open-source',
-        metadata: item.metadata,
-        searchableContent: `${item.kind} ${item.link}`,
+        sectionHref: `#tutorial/${item.id}`,
+        metadata: {
+          difficulty: 'Beginner',
+          industry: 'Cross-Industry',
+          technology: ['Generative AI'],
+          estimatedReadingTime: 5,
+          businessDomain: 'AI Education',
+          researchStatus: 'Published',
+          updatedDate: '2026-09-14',
+          author: 'Inventyfie Research Lab',
+          version: '1.0.0',
+          tags: ['Tutorial', 'LLMs'],
+        },
+        searchableContent: item.sections
+          .flatMap((section) => [...section.paragraphs, ...(section.bullets ?? [])])
+          .join(' '),
       });
     });
 
-    RESOURCE_ITEMS.forEach((item) => {
-      docs.push({
-        id: item.id,
-        kind: 'Resources',
-        title: item.title,
-        summary: item.summary,
-        sectionHref: '#resources',
-        metadata: item.metadata,
-        searchableContent: `${item.kind} ${item.link}`,
-      });
+    docs.push({
+      id: enterpriseRagArticle.slug,
+      kind: 'Engineering',
+      title: enterpriseRagArticle.title,
+      summary: enterpriseRagArticle.subtitle,
+      sectionHref: '#engineering',
+      metadata: {
+        difficulty: 'Advanced',
+        industry: 'Cross-Industry',
+        technology: enterpriseRagArticle.tags,
+        estimatedReadingTime: 25,
+        businessDomain: 'Knowledge Management',
+        researchStatus: 'Published',
+        updatedDate: '2026-09-14',
+        author: 'Inventyfie Research Lab',
+        version: '1.0.0',
+        tags: enterpriseRagArticle.tags,
+      },
+      searchableContent: enterpriseRagArticle.sections.map((section) => `${section.title} ${section.content.join(' ')}`).join(' '),
     });
 
     cmsEntries.forEach((item) => {
@@ -561,8 +634,8 @@ export default function App() {
         />
 
         <main className="relative z-10">
-          {activeTutorial ? <TutorialDetail tutorial={activeTutorial} /> : <>
-          <section id="home" className="flex min-h-screen flex-col items-center justify-center px-6 pt-20 text-center">
+          <>
+          <section id="home" className={`${activePage === 'home' ? '' : 'hidden'} flex min-h-screen flex-col items-center justify-center px-6 pt-20 text-center`}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -583,7 +656,7 @@ export default function App() {
               className="hero-title theme-text-primary mb-6 font-display text-5xl font-bold leading-[1.1] tracking-tight text-slate-900 dark:text-white md:text-8xl"
             >
               Inventyfie <br />
-              <span className="text-gradient">Research. Engineering. Benchmarks.</span>
+              <span className="text-gradient">Research. Engineering. Practical AI.</span>
             </motion.h1>
 
             <motion.p
@@ -599,7 +672,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col gap-4 sm:flex-row"
+              className="flex flex-col gap-4 sm:flex-row sm:gap-6"
             >
               <a
                 href="#research"
@@ -626,13 +699,13 @@ export default function App() {
             </motion.div>
           </section>
 
-          <Section id="search" className="px-6 pb-12">
+          <Section id="search" className={`${activePage === 'home' ? '' : 'hidden'} px-6 pb-12 pt-12 md:pt-16`}>
             <div className="mx-auto max-w-7xl">
               <SearchExplorer docs={searchDocs} cmsEntries={cmsEntries} />
             </div>
           </Section>
 
-          <Section id="research" className="py-24 px-6">
+          <Section id="research" className={`${activePage === 'research' ? '' : 'hidden'} py-24 px-6`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center md:text-left">
                 <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Research</p>
@@ -642,6 +715,7 @@ export default function App() {
                 </p>
               </div>
 
+              {RESEARCH_INVESTIGATIONS.length === 0 ? <EmptyState /> : null}
               <div className="grid gap-8 lg:grid-cols-2">
                 {RESEARCH_INVESTIGATIONS.map((item) => (
                   <article key={item.id} className="theme-card-hover glass section-panel rounded-3xl border border-white/10 p-6">
@@ -680,7 +754,7 @@ export default function App() {
             </div>
           </Section>
 
-          <Section id="tutorial" className="py-24 px-6">
+          <Section id="tutorial" className={`${activePage === 'tutorial' ? '' : 'hidden'} py-24 px-6`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center md:text-left">
                 <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Tutorial</p>
@@ -690,53 +764,13 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-3">
-                <article className="theme-card-hover glass rounded-3xl border border-neon-cyan/30 p-6 lg:col-span-3">
-                  <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                    <img src="/llm-temperature-thumbnail.png" alt="How LLM Temperature Works thumbnail" className="aspect-video w-full rounded-2xl border border-white/10 object-cover md:order-2 md:max-w-sm" />
-                    <div className="max-w-3xl">
-                      <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">Featured animation · 10 sec</p>
-                      <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How LLM Temperature Works 🌡️</h3>
-                      <p className="mb-4 text-sm leading-relaxed text-slate-700 dark:text-white/70">Temperature scales token scores before softmax. With top-p fixed at 90%, the eligible set shrinks from 5 → 3 → 1 as the distribution sharpens.</p>
-                      <a href="#tutorial/llm-temperature" className="inline-flex items-center gap-2 font-semibold text-neon-cyan hover:underline">Read the explanation <ArrowRight size={16} /></a>
-                    </div>
-                    <div className="shrink-0 rounded-2xl border border-neon-cyan/20 bg-neon-cyan/10 px-5 py-4 text-center">
-                      <span className="block text-3xl font-bold text-neon-cyan">5 → 3 → 1</span>
-                      <span className="text-xs uppercase tracking-widest text-slate-600 dark:text-white/55">eligible tokens</span>
-                    </div>
-                  </div>
-                </article>
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">01 · Read</p>
-                  <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How to evaluate a research brief</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">
-                    Start with the problem, benchmark, assumptions, and business constraints before judging whether an AI pattern is suitable for your team.
-                  </p>
-                  <a href="#research" className="text-neon-cyan hover:underline">Open research section</a>
-                </article>
-
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">02 · Compare</p>
-                  <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How to compare AI architectures</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">
-                    Map architecture decisions against latency, cost, reliability, observability, governance, and operational complexity before choosing a stack.
-                  </p>
-                  <a href="#decision-frameworks" className="text-neon-cyan hover:underline">Open decision frameworks</a>
-                </article>
-
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">03 · Ship</p>
-                  <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">How to turn experiments into production</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">
-                    Move from proof-of-concept to production by validating metrics, adding safety guardrails, and measuring business impact with iterative releases.
-                  </p>
-                  <a href="#engineering" className="text-neon-cyan hover:underline">See engineering showcases</a>
-                </article>
+              <div className="grid gap-6">
+                {TUTORIAL_ARTICLES.map((tutorial) => <TutorialCard key={tutorial.id} tutorial={tutorial} />)}
               </div>
             </div>
           </Section>
 
-          <Section id="engineering" className="section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]">
+          <Section id="engineering" className={`${activePage === 'engineering' ? '' : 'hidden'} section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center md:text-left">
                 <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Engineering</p>
@@ -746,6 +780,7 @@ export default function App() {
                 </p>
               </div>
 
+              {activeEngineeringTopic === 'enterprise-rag-technical-knowledge' ? <EnterpriseRagArticle /> : <EnterpriseRagCard />}
               <div className="grid gap-8 lg:grid-cols-2">
                 {ENGINEERING_PROJECTS.map((project, index) => {
                   const Icon = iconByIndex[index % iconByIndex.length];
@@ -780,7 +815,7 @@ export default function App() {
             </div>
           </Section>
 
-          <Section id="case-studies" className="py-24 px-6">
+          <Section id="case-studies" className={`${activePage === 'case-studies' ? '' : 'hidden'} py-24 px-6`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center md:text-left">
                 <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Case Studies</p>
@@ -790,6 +825,7 @@ export default function App() {
                 </p>
               </div>
 
+              {CASE_STUDIES.length === 0 ? <EmptyState /> : null}
               <div className="grid gap-8 lg:grid-cols-2">
                 {CASE_STUDIES.map((study) => (
                   <article key={study.id} className="theme-card-hover glass rounded-3xl border border-white/10 p-6">
@@ -812,156 +848,7 @@ export default function App() {
             </div>
           </Section>
 
-          <Section id="benchmarks" className="section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Benchmarks</p>
-                <h2 className={sectionTitleClass}>Benchmark <span className="text-neon-purple">Center</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Comparative studies across embedding models, LLMs, SLMs, vector databases, chunking strategies, RAG frameworks, agent frameworks, and cloud providers.
-                </p>
-              </div>
-
-              <div className="grid gap-8 lg:grid-cols-2">
-                {BENCHMARK_STUDIES.map((benchmark) => (
-                  <article key={benchmark.id} className="theme-card-hover glass rounded-3xl border border-white/10 p-6">
-                    <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">{benchmark.title}</h3>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Category:</strong> {benchmark.category}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Environment:</strong> {benchmark.environment}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Dataset:</strong> {benchmark.dataset}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Methodology:</strong> {benchmark.methodology}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Results:</strong> {benchmark.results.join(' · ')}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Charts:</strong> {benchmark.charts.join(' · ')}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Metrics:</strong> {benchmark.metrics.join(' · ')}</p>
-                    <p className="mb-4 text-sm text-slate-700 dark:text-white/70"><strong>Final Recommendation:</strong> {benchmark.finalRecommendation}</p>
-                    <MetadataStrip metadata={benchmark.metadata} />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          <Section id="decision-frameworks" className="py-24 px-6">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Decision Frameworks</p>
-                <h2 className={sectionTitleClass}>Decision <span className="text-neon-cyan">Framework Library</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Signature decision intelligence guides answering: Should I Use AI, Machine Learning, RAG, AI Agents, Fine-Tuning, Spark, SQL, or Vector Databases?
-                </p>
-              </div>
-
-              <div className="grid gap-8 lg:grid-cols-2">
-                {DECISION_FRAMEWORKS.map((framework) => (
-                  <article key={framework.id} className="theme-card-hover glass rounded-3xl border border-white/10 p-6">
-                    <h3 className="mb-3 font-display text-2xl font-bold text-slate-900 dark:text-white">{framework.title}</h3>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Decision Tree:</strong> {framework.decisionTree.join(' -> ')}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Business Considerations:</strong> {framework.businessConsiderations.join(' · ')}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Technical Considerations:</strong> {framework.technicalConsiderations.join(' · ')}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Cost:</strong> {framework.cost}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Complexity:</strong> {framework.complexity}</p>
-                    <p className="mb-2 text-sm text-slate-700 dark:text-white/70"><strong>Recommended Architecture:</strong> {framework.recommendedArchitecture}</p>
-                    <p className="mb-4 text-sm text-slate-700 dark:text-white/70"><strong>When NOT to Use:</strong> {framework.whenNotToUse.join(' · ')}</p>
-                    <MetadataStrip metadata={framework.metadata} />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          <Section id="research-library" className="section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Research Library</p>
-                <h2 className={sectionTitleClass}>Research <span className="text-neon-purple">Library</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Curated domain taxonomy replacing the academy section with category-led research navigation.
-                </p>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {RESEARCH_LIBRARY_CATEGORIES.map((category) => (
-                  <div key={category} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-700 dark:text-white/70">
-                    {category}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          <Section id="research-journal" className="py-24 px-6">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Research Journal</p>
-                <h2 className={sectionTitleClass}>Research <span className="text-neon-cyan">Journal</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Chronological logs of observations, experiments, failures, interesting papers, future topics, and open questions.
-                </p>
-              </div>
-
-              <div className="space-y-5">
-                {RESEARCH_JOURNAL.map((entry) => (
-                  <article key={entry.id} className="glass rounded-3xl border border-white/10 p-6">
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-                      <h3 className="font-display text-2xl font-semibold text-slate-900 dark:text-white">{entry.title}</h3>
-                      <span className="text-xs uppercase tracking-[0.14em] text-neon-cyan">{entry.date} · {entry.kind}</span>
-                    </div>
-                    <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{entry.note}</p>
-                    <MetadataStrip metadata={entry.metadata} />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          <Section id="open-source" className="section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Open Source</p>
-                <h2 className={sectionTitleClass}>Open Source <span className="text-neon-purple">Hub</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Repositories, libraries, datasets, templates, utilities, reusable components, and research tools.
-                </p>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {OPEN_SOURCE_ITEMS.map((item) => (
-                  <article key={item.id} className="glass rounded-3xl border border-white/10 p-6">
-                    <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">{item.kind}</p>
-                    <h3 className="mb-2 font-display text-2xl font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                    <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{item.summary}</p>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="mb-4 inline-block text-neon-cyan hover:underline">Open Repository</a>
-                    <MetadataStrip metadata={item.metadata} />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </Section>
-
-          <Section id="resources" className="py-24 px-6">
-            <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
-                <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / Resources</p>
-                <h2 className={sectionTitleClass}>Resources <span className="text-neon-cyan">Library</span></h2>
-                <p className="theme-text-secondary max-w-3xl text-slate-600 dark:text-white/50">
-                  Curated books, research papers, conferences, datasets, benchmarks, communities, and learning paths.
-                </p>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {RESOURCE_ITEMS.map((item) => (
-                  <article key={item.id} className="glass rounded-3xl border border-white/10 p-6">
-                    <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">{item.kind}</p>
-                    <h3 className="mb-2 font-display text-2xl font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                    <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{item.summary}</p>
-                    <a href={item.link} target="_blank" rel="noreferrer" className="mb-4 inline-block text-neon-cyan hover:underline">Open Resource</a>
-                    <MetadataStrip metadata={item.metadata} />
-                  </article>
-                ))}
-              </div>
-            </div>
-          </Section>
-
+          {isAdminRoute && (
           <Section id="admin" className="section-panel py-24 px-6 bg-white/[0.02] dark:bg-white/[0.02]">
             <div className="mx-auto max-w-7xl">
               <div className="mb-16 text-center md:text-left">
@@ -997,6 +884,7 @@ export default function App() {
               ) : null}
             </div>
           </Section>
+          )}
 
           <Section id="about" className="py-24 px-6">
             <div className="mx-auto max-w-7xl">
@@ -1007,31 +895,31 @@ export default function App() {
 
               <div className="grid gap-6 lg:grid-cols-2">
                 <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Mission</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">How We Help</h3>
                   <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.mission}</p>
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Vision</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">What We Are Building</h3>
                   <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.vision}</p>
                 </article>
 
                 <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Publication Philosophy</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Our Approach</h3>
                   <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.publicationPhilosophy}</p>
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Founder Story</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Coming Next</h3>
                   <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.founderStory}</p>
                 </article>
 
                 <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Research Principles</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">What We Value</h3>
                   <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.researchPrinciples.join(' · ')}</p>
-                  <h3 className="mb-3 mt-5 font-display text-2xl font-semibold text-slate-900 dark:text-white">Engineering Principles</h3>
+                  <h3 className="mb-3 mt-5 font-display text-2xl font-semibold text-slate-900 dark:text-white">How We Build</h3>
                   <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.engineeringPrinciples.join(' · ')}</p>
                 </article>
 
                 <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Roadmap</h3>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Planned Capabilities</h3>
                   <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.roadmap.join(' · ')}</p>
                   <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Future Modules</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">{FUTURE_MODULES.join(' · ')}</p>
+                  <p className="text-sm text-slate-700 dark:text-white/70">Data will be added soon.</p>
                 </article>
               </div>
             </div>
@@ -1076,7 +964,7 @@ export default function App() {
               </div>
             </div>
           </Section>
-          </>}
+          </>
         </main>
 
         <footer className="theme-text-muted py-12 px-6 text-center text-slate-500 dark:text-white/30 border-t border-slate-300 dark:border-white/5">

@@ -1,16 +1,12 @@
 import { motion } from 'motion/react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { cn } from '../lib/utils';
 
 export const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
 
-  const themes = [
-    { value: 'light' as const, icon: Sun, label: 'Light' },
-    { value: 'dark' as const, icon: Moon, label: 'Dark' },
-    { value: 'system' as const, icon: Monitor, label: 'System' }
-  ];
+  const themes = [{ value: 'dark' as const, icon: Moon, label: 'Dark' }];
 
   return (
     <div className="switcher-shell flex items-center gap-2 rounded-full bg-white/5 dark:bg-white/5 border border-white/10 dark:border-white/10 p-1.5">

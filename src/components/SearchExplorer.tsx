@@ -71,7 +71,7 @@ export const SearchExplorer = ({ docs, cmsEntries }: SearchExplorerProps) => {
   }, [docs, filter, query]);
 
   return (
-    <div className="glass section-panel rounded-3xl border border-white/10 p-6 md:p-8">
+    <div className="glass readable-surface section-panel rounded-3xl border border-white/10 p-6 md:p-8">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white">Intelligent Search</h3>
         <div className="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-white/45">
@@ -85,7 +85,7 @@ export const SearchExplorer = ({ docs, cmsEntries }: SearchExplorerProps) => {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search research, projects, benchmarks, case studies, resources, open source and decision frameworks"
+            placeholder="Search research, tutorials, engineering, case studies, and admin content"
             className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none dark:text-white dark:placeholder:text-white/45"
           />
         </label>

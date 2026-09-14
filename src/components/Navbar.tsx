@@ -27,6 +27,7 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -56,20 +57,20 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
         </motion.a>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex md:flex-1 md:items-center md:justify-end">
-          <div className="mr-4 flex items-center gap-5 lg:gap-6">
+        <div className="hidden xl:flex xl:flex-1 xl:items-center xl:gap-8 xl:pl-16">
+          <div className="flex items-center gap-4 lg:gap-5">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className="nav-text theme-link-hover text-sm font-medium text-slate-700 dark:text-white/70"
+                className="nav-text theme-link-hover text-base font-medium text-slate-700 dark:text-white/70"
               >
                 {link.name}
               </a>
             ))}
 
           </div>
-          <div className="relative flex items-center gap-3 justify-end">
+          <div className="relative ml-auto flex items-center justify-end gap-3">
             <MascotWatcher />
             <div className="relative h-8 w-[152px] shrink-0">
               <AnimatePresence mode="sync">
@@ -91,7 +92,7 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
 
         {/* Mobile Toggle */}
         <button 
-          className="nav-text md:hidden text-white dark:text-white"
+          className="nav-text xl:hidden text-white dark:text-white"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -103,7 +104,7 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute left-0 top-full w-full glass nav-surface p-6 md:hidden"
+          className="absolute left-0 top-full w-full glass nav-surface p-6 xl:hidden"
         >
           <div className="flex flex-col gap-4">
             {navLinks.map((link) => (
@@ -116,9 +117,6 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
                 {link.name}
               </a>
             ))}
-            <div className="flex items-end justify-between gap-4">
-              <MascotWatcher />
-            </div>
           </div>
         </motion.div>
       )}
