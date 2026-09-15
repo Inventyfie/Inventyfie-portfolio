@@ -1,0 +1,415 @@
+WEBVTT
+
+1
+00:00:00.650 --> 00:00:06.660
+A dragon opens its mouth... What comes out? Fire? Smoke?
+Or... bubbles?!
+
+2
+00:00:09.150 --> 00:00:16.938
+Same prompt. Same model. Three controls can change what
+gets picked. Let's turn them and watch!
+
+3
+00:00:18.400 --> 00:00:22.735
+This is a creative teaching simulation with invented
+scores.
+
+4
+00:00:22.735 --> 00:00:26.745
+It does not reveal any provider's private architecture.
+
+5
+00:00:26.745 --> 00:00:30.453
+Available settings and their order can vary.
+
+6
+00:00:31.942 --> 00:00:38.072
+Our prompt is: The dragon breathed... We'll imagine six
+possible next tokens.
+
+7
+00:00:38.072 --> 00:00:41.633
+Real models have much larger vocabularies.
+
+8
+00:00:43.108 --> 00:00:48.098
+The model gives each token a raw score, called a logit.
+
+9
+00:00:48.098 --> 00:00:55.457
+Softmax turns those scores into probabilities that add
+up to one hundred percent.
+
+10
+00:00:56.942 --> 00:01:03.002
+Fire starts at about forty one percent. Bubbles has
+about nine percent.
+
+11
+00:01:03.002 --> 00:01:07.958
+These are invented chances of selection, not truth
+scores.
+
+12
+00:01:09.442 --> 00:01:13.862
+First up: temperature! Keep every token eligible.
+
+13
+00:01:13.862 --> 00:01:20.866
+Predict this: if we lower temperature, will the leading
+bar grow or shrink?
+
+14
+00:01:22.817 --> 00:01:30.166
+Let's find out. Slide temperature from one to zero point
+five. Watch fire's probability climb!
+
+15
+00:01:31.650 --> 00:01:39.020
+Why? Every logit is divided by temperature. Two divided
+by zero point five becomes four.
+
+16
+00:01:39.020 --> 00:01:43.997
+One point five becomes three. The score gap doubles.
+
+17
+00:01:45.483 --> 00:01:51.188
+There it goes! Fire rises from forty one to sixty three
+percent.
+
+18
+00:01:51.188 --> 00:01:56.943
+Its lottery slice grows, but other tokens can still win.
+
+19
+00:01:58.400 --> 00:02:03.905
+Now turn temperature up to two. Whoa, look at the
+smaller bars!
+
+20
+00:02:03.905 --> 00:02:08.977
+They gain probability as the distribution spreads out.
+
+21
+00:02:10.442 --> 00:02:16.492
+Fire falls to about twenty eight percent. Bubbles rises
+to thirteen percent.
+
+22
+00:02:16.492 --> 00:02:21.022
+Higher temperature makes less likely choices more
+competitive.
+
+23
+00:02:22.483 --> 00:02:29.043
+Try the same illustrative random draw with both
+settings. At low temperature: fire.
+
+24
+00:02:29.043 --> 00:02:33.502
+At high temperature: bubbles! The scores never changed.
+
+25
+00:02:34.983 --> 00:02:43.478
+At zero point two, fire has about ninety two percent.
+The wheel is almost all fire. Predictable?
+
+26
+00:02:43.478 --> 00:02:46.496
+Yes. Automatically correct? No.
+
+27
+00:02:47.983 --> 00:02:50.358
+Temperature reshapes the chances.
+
+28
+00:02:50.358 --> 00:02:56.308
+It does not reorder the original scores or change the
+model's learned weights.
+
+29
+00:02:56.308 --> 00:03:00.690
+Zero is commonly handled as greedy selection.
+
+30
+00:03:02.150 --> 00:03:08.485
+Reset temperature to one. Now meet top k: the guest
+list!
+
+31
+00:03:08.485 --> 00:03:13.161
+You choose how many leading tokens get into the lottery.
+
+32
+00:03:14.650 --> 00:03:21.994
+Set k to three. Fire, smoke, and sparks stay. Bubbles,
+confetti, and ice are out!
+
+33
+00:03:23.483 --> 00:03:27.468
+Those three originally total about eighty two percent.
+
+34
+00:03:27.468 --> 00:03:34.338
+Rescale their chances to fill the whole wheel: about
+fifty point six, thirty point seven,
+
+35
+00:03:34.338 --> 00:03:37.316
+and eighteen point six percent.
+
+36
+00:03:38.775 --> 00:03:44.435
+Rescaling just means dividing each remaining chance by
+the total left.
+
+37
+00:03:44.435 --> 00:03:48.840
+Fire's forty one percent becomes about fifty one
+percent.
+
+38
+00:03:48.840 --> 00:03:55.026
+We are sharing one whole pie again, not applying softmax
+to probabilities.
+
+39
+00:03:56.483 --> 00:04:01.703
+Now, a challenge. What happens at k equals one?
+
+40
+00:04:01.703 --> 00:04:04.568
+Pause and guess...
+
+41
+00:04:04.568 --> 00:04:07.388
+Exactly! Only fire remains.
+
+42
+00:04:07.388 --> 00:04:10.493
+Its chance is one hundred percent.
+
+43
+00:04:12.483 --> 00:04:15.968
+Raise k again. The other candidates return.
+
+44
+00:04:15.968 --> 00:04:21.957
+K is configurable where supported; it is not secretly
+chosen by temperature.
+
+45
+00:04:23.442 --> 00:04:26.602
+Top k controls the candidate count.
+
+46
+00:04:26.602 --> 00:04:34.252
+Which tokens make that list can change with the prompt
+and with every new generation step.
+
+47
+00:04:35.733 --> 00:04:39.583
+Keep temperature at one and disable top k.
+
+48
+00:04:39.583 --> 00:04:48.040
+Top p asks a different question: how many leading tokens
+reach our probability target?
+
+49
+00:04:49.525 --> 00:04:57.400
+Set p to ninety percent. Start with fire: forty one
+percent. Add smoke: about sixty seven.
+
+50
+00:04:57.400 --> 00:04:59.647
+Still not enough!
+
+51
+00:05:01.108 --> 00:05:09.118
+Add sparks: about eighty two percent. Add bubbles: about
+ninety one. Ding! We crossed ninety.
+
+52
+00:05:09.118 --> 00:05:11.680
+Keep these four and stop.
+
+53
+00:05:13.150 --> 00:05:19.115
+Lower p to sixty five percent. Now fire and smoke are
+enough!
+
+54
+00:05:19.115 --> 00:05:23.715
+The same scores produce a smaller eligible set.
+
+55
+00:05:25.192 --> 00:05:31.047
+Raise p to ninety five percent. Four are no longer
+enough.
+
+56
+00:05:31.047 --> 00:05:37.087
+Confetti joins the party, bringing the total to about
+ninety seven percent.
+
+57
+00:05:38.567 --> 00:05:46.047
+Here's the trick: p measures combined probability, not a
+percentage of vocabulary tokens.
+
+58
+00:05:46.047 --> 00:05:50.923
+We include whole tokens, so the total may overshoot the
+target.
+
+59
+00:05:52.400 --> 00:05:59.225
+Hold p at ninety percent. At temperature one, four
+tokens make the cut.
+
+60
+00:05:59.225 --> 00:06:02.972
+Now lower temperature and watch the meter.
+
+61
+00:06:04.442 --> 00:06:12.637
+At zero point five, just three tokens reach ninety
+percent. At zero point two, fire alone does!
+
+62
+00:06:12.637 --> 00:06:16.802
+P stayed fixed; temperature changed the distribution.
+
+63
+00:06:18.275 --> 00:06:22.005
+Ready for the full experiment?
+
+64
+00:06:22.005 --> 00:06:29.774
+Set temperature to zero point five, k to four, and p to
+zero point eight five.
+
+65
+00:06:31.233 --> 00:06:37.563
+First, temperature sharpens the probabilities. Then top
+k keeps four candidates.
+
+66
+00:06:37.563 --> 00:06:43.589
+In our demonstration, we normalize within that remaining
+pool before applying top p.
+
+67
+00:06:45.067 --> 00:06:53.552
+The first two now total about eighty eight percent,
+which passes our eighty five percent target.
+
+68
+00:06:53.552 --> 00:06:56.526
+Top p keeps fire and smoke.
+
+69
+00:06:57.983 --> 00:07:06.178
+Normalize once more. Fire gets about seventy three
+percent of the wheel; smoke gets twenty seven.
+
+70
+00:07:06.178 --> 00:07:09.886
+Now the random picker chooses one token.
+
+71
+00:07:11.358 --> 00:07:17.208
+And this illustrative draw lands on... smoke! A smaller
+slice can win.
+
+72
+00:07:17.208 --> 00:07:21.481
+Probability describes a chance, not a promise.
+
+73
+00:07:22.942 --> 00:07:29.742
+Keep k and p fixed, but raise temperature to two. The
+distribution flattens.
+
+74
+00:07:29.742 --> 00:07:33.951
+This time, top p needs all four candidates!
+
+75
+00:07:35.442 --> 00:07:43.142
+One more surprise: if k is one, changing temperature
+cannot bring excluded tokens back.
+
+76
+00:07:43.142 --> 00:07:46.899
+There is only one slice left to choose.
+
+77
+00:07:48.358 --> 00:07:56.428
+Append the selected token to the prompt. New context
+produces new scores, and the lottery repeats.
+
+78
+00:07:56.428 --> 00:08:00.709
+These controls can shape the wording that follows.
+
+79
+00:08:02.192 --> 00:08:05.497
+What about repeating words?
+
+80
+00:08:05.497 --> 00:08:11.762
+Separate repetition penalties can lower the scores of
+tokens already used.
+
+81
+00:08:11.762 --> 00:08:17.822
+They encourage alternatives, but do not ban repetition
+or guarantee a better answer.
+
+82
+00:08:19.275 --> 00:08:23.620
+Quick challenge! Bigger or smaller slices?
+
+83
+00:08:23.620 --> 00:08:24.955
+That's temperature.
+
+84
+00:08:24.955 --> 00:08:29.005
+A fixed number of candidates?
+
+85
+00:08:29.005 --> 00:08:29.517
+Top k.
+
+86
+00:08:29.517 --> 00:08:33.665
+A cumulative probability target?
+
+87
+00:08:33.665 --> 00:08:35.469
+Top p. You've got it!
+
+88
+00:08:36.942 --> 00:08:43.587
+These are sampling controls, not truth controls. They
+cannot guarantee fewer hallucinations.
+
+89
+00:08:43.587 --> 00:08:48.422
+For factual answers, use reliable evidence and verify
+important claims.
+
+90
+00:08:49.900 --> 00:08:56.865
+Now you can picture it: temperature reshapes, k caps, p
+filters, and sampling picks.
+
+91
+00:08:56.865 --> 00:09:01.362
+Try one setting at a time. Keep experimenting!
+
