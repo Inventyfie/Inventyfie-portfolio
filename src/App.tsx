@@ -9,7 +9,9 @@ import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowRight,
   Brain,
+  Check,
   ChevronDown,
+  Copy,
   Cpu,
   Github,
   Linkedin,
@@ -36,7 +38,7 @@ import { MetadataStrip } from './components/MetadataStrip';
 import { SearchDocument, SearchExplorer } from './components/SearchExplorer';
 import { loadCmsEntries, saveCmsEntries } from './lib/cms';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
-import { EnterpriseRagArticle, EnterpriseRagCard } from './components/EnterpriseRagArticle';
+import { EnterpriseRagCard } from './components/EnterpriseRagArticle';
 import enterpriseRagArticle from './Engineering/data/enterprise-rag-technical-knowledge.json';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel').then((mod) => ({ default: mod.AdminPanel })));
@@ -229,6 +231,7 @@ const sectionTitleClass = 'theme-text-primary mb-4 font-display text-4xl font-bo
 type PageId = 'home' | 'research' | 'tutorial' | 'engineering' | 'case-studies';
 
 const pageFromHash = (hash: string): PageId => {
+  if (hash === '#home') return 'home';
   if (hash.startsWith('#tutorial')) return 'tutorial';
   if (hash === '#research') return 'research';
   if (hash.startsWith('#engineering')) return 'engineering';
@@ -237,6 +240,7 @@ const pageFromHash = (hash: string): PageId => {
 };
 
 const engineeringTopicFromHash = (hash: string) => hash.startsWith('#engineering/') ? hash.slice('#engineering/'.length) : null;
+const tutorialTopicFromHash = (hash: string) => hash.startsWith('#tutorial/') ? hash.slice('#tutorial/'.length) : null;
 
 function TutorialDetail({ tutorial, onClose }: { tutorial: TutorialArticle; onClose?: () => void }) {
   return (
@@ -284,7 +288,29 @@ function TutorialDetail({ tutorial, onClose }: { tutorial: TutorialArticle; onCl
   );
 }
 
-function TutorialCard({ tutorial }: { tutorial: TutorialArticle }) {
+function TutorialShareButton({ tutorialId }: { tutorialId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyTutorialLink = async () => {
+    const link = `${window.location.origin}${window.location.pathname}#tutorial/${tutorialId}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt('Copy this tutorial link:', link);
+    }
+  };
+
+  return (
+    <button type="button" onClick={copyTutorialLink} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/15" aria-label="Copy tutorial link" title="Copy tutorial link">
+      {copied ? <Check size={16} /> : <Copy size={16} />}
+      {copied ? 'Link copied' : 'Share'}
+    </button>
+  );
+}
+
+function TutorialCard({ tutorial, isSelected = false }: { tutorial: TutorialArticle; isSelected?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -298,14 +324,17 @@ function TutorialCard({ tutorial }: { tutorial: TutorialArticle }) {
 
   return (
     <>
-      <article className="theme-card-hover readable-surface overflow-hidden rounded-3xl border border-neon-cyan/25 p-6 md:p-8">
+      <article id={`tutorial-${tutorial.id}`} className={`theme-card-hover readable-surface overflow-hidden rounded-3xl border p-6 md:p-8 ${isSelected ? 'border-neon-cyan ring-2 ring-neon-cyan/50 shadow-[0_0_35px_rgba(0,242,255,0.3)]' : 'border-neon-cyan/25'}`}>
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <img src={tutorial.thumbnail} alt={`${tutorial.title} thumbnail`} className="aspect-video w-full rounded-2xl border border-white/10 object-cover md:order-2 md:max-w-sm" />
           <div className="max-w-3xl">
             <p className="mb-2 text-xs uppercase tracking-[0.14em] text-neon-cyan">Featured tutorial · 10 sec</p>
             <h3 className="mb-3 font-display text-2xl font-bold text-white">{tutorial.title}</h3>
             <p className="mb-4 text-sm leading-relaxed text-white/70">{tutorial.subtitle}</p>
-            <button type="button" onClick={() => setIsOpen(true)} className="accent-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white">Read tutorial <ArrowRight size={16} /></button>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={() => setIsOpen(true)} className="accent-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white">Read tutorial <ArrowRight size={16} /></button>
+              <TutorialShareButton tutorialId={tutorial.id} />
+            </div>
           </div>
         </div>
       </article>
@@ -328,6 +357,7 @@ export default function App() {
   const [isAdminRoute, setIsAdminRoute] = useState(() => window.location.hash === '#admin');
   const [activePage, setActivePage] = useState<PageId>(() => pageFromHash(window.location.hash));
   const [activeEngineeringTopic, setActiveEngineeringTopic] = useState(() => engineeringTopicFromHash(window.location.hash));
+  const [activeTutorialTopic, setActiveTutorialTopic] = useState(() => tutorialTopicFromHash(window.location.hash));
 
   const chooseRandomThemeIndex = useCallback((current: number) => {
     if (BACKGROUND_THEMES.length < 2) {
@@ -369,6 +399,7 @@ export default function App() {
       setIsAdminRoute(window.location.hash === '#admin');
       setActivePage(pageFromHash(window.location.hash));
       setActiveEngineeringTopic(engineeringTopicFromHash(window.location.hash));
+      setActiveTutorialTopic(tutorialTopicFromHash(window.location.hash));
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
@@ -376,14 +407,18 @@ export default function App() {
 
   useEffect(() => {
     const hash = window.location.hash;
-    const targetId = hash === '#contact' || hash === '#about'
+    const targetId = activePage === 'engineering' && activeEngineeringTopic
+      ? 'enterprise-rag-technical-knowledge-card'
+      : activePage === 'tutorial' && activeTutorialTopic
+      ? `tutorial-${activeTutorialTopic}`
+      : hash === '#contact' || hash === '#about'
       ? hash.slice(1)
       : activePage;
 
     window.requestAnimationFrame(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: 'center' });
     });
-  }, [activePage, activeEngineeringTopic]);
+  }, [activePage, activeEngineeringTopic, activeTutorialTopic]);
 
   useEffect(() => {
     const siteUrl = import.meta.env.VITE_SITE_URL || 'https://inventyfie.com';
@@ -631,6 +666,7 @@ export default function App() {
           }}
           onThemeChipClick={randomizeTheme}
           navLinks={NAV_LINKS}
+          activeHref={activePage === 'engineering' ? '#engineering' : activePage === 'tutorial' ? '#tutorial' : activePage === 'research' ? '#research' : activePage === 'case-studies' ? '#case-studies' : '#home'}
         />
 
         <main className="relative z-10">
@@ -765,7 +801,7 @@ export default function App() {
               </div>
 
               <div className="grid gap-6">
-                {TUTORIAL_ARTICLES.map((tutorial) => <TutorialCard key={tutorial.id} tutorial={tutorial} />)}
+                {TUTORIAL_ARTICLES.map((tutorial) => <TutorialCard key={tutorial.id} tutorial={tutorial} isSelected={activeTutorialTopic === tutorial.id} />)}
               </div>
             </div>
           </Section>
@@ -780,7 +816,7 @@ export default function App() {
                 </p>
               </div>
 
-              {activeEngineeringTopic === 'enterprise-rag-technical-knowledge' ? <EnterpriseRagArticle /> : <EnterpriseRagCard />}
+              <EnterpriseRagCard isSelected={activeEngineeringTopic === 'enterprise-rag-technical-knowledge'} />
               <div className="grid gap-8 lg:grid-cols-2">
                 {ENGINEERING_PROJECTS.map((project, index) => {
                   const Icon = iconByIndex[index % iconByIndex.length];

@@ -1,5 +1,5 @@
 import { useEffect, useState, type MouseEvent } from 'react';
-import { ArrowRight, ChevronDown, ExternalLink, X } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, Copy, ExternalLink, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Section } from './Section';
 import article from '../Engineering/data/enterprise-rag-technical-knowledge.json';
@@ -83,7 +83,29 @@ const PdfPreviewModal = ({ source, title, onClose }: { source: string; title: st
   document.body,
 );
 
-export const EnterpriseRagCard = () => {
+const ShareArticleButton = () => {
+  const [copied, setCopied] = useState(false);
+
+  const copyArticleLink = async () => {
+    const link = `${window.location.origin}${window.location.pathname}#engineering/${article.slug}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      window.prompt('Copy this article link:', link);
+    }
+  };
+
+  return (
+    <button type="button" onClick={copyArticleLink} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15" aria-label="Copy article link" title="Copy article link">
+      {copied ? <Check size={14} /> : <Copy size={14} />}
+      {copied ? 'Link copied' : 'Share'}
+    </button>
+  );
+};
+
+export const EnterpriseRagCard = ({ isSelected = false }: { isSelected?: boolean }) => {
   const [isReaderOpen, setIsReaderOpen] = useState(false);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [pdfSource, setPdfSource] = useState<{ source: string; title: string } | null>(null);
@@ -105,7 +127,7 @@ export const EnterpriseRagCard = () => {
 
   return (
     <>
-      <article className="theme-card-hover readable-surface overflow-hidden rounded-3xl border border-neon-cyan/25">
+      <article id="enterprise-rag-technical-knowledge-card" className={`theme-card-hover readable-surface overflow-hidden rounded-3xl border p-6 md:p-8 ${isSelected ? 'border-neon-cyan ring-2 ring-neon-cyan/50 shadow-[0_0_35px_rgba(0,242,255,0.3)]' : 'border-neon-cyan/25'}`}>
     <div className="grid md:grid-cols-[280px_minmax(0,1fr)]">
       <img src={article.heroImage.src} alt={article.heroImage.alt} className="h-full min-h-56 w-full object-cover" loading="lazy" />
       <div className="p-6 md:p-8">
@@ -118,6 +140,7 @@ export const EnterpriseRagCard = () => {
         </div>
         <div className="flex flex-wrap gap-3">
           <button type="button" onClick={() => setIsReaderOpen(true)} className="accent-button inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-white">Read article <ArrowRight size={16} /></button>
+          <ShareArticleButton />
           <button type="button" onClick={() => setIsPdfOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15"><ExternalLink size={16} /> Preview PDFs</button>
         </div>
       </div>
@@ -173,6 +196,7 @@ export const EnterpriseRagArticle = ({ onClose }: { onClose?: () => void }) => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             {onClose ? <button type="button" onClick={onClose} className="text-sm font-semibold text-neon-cyan hover:underline">← Back to Engineering topics</button> : <a href="#engineering" className="text-sm font-semibold text-neon-cyan hover:underline">← Back to Engineering topics</a>}
             <div className="flex flex-wrap gap-2">
+              <ShareArticleButton />
               <button type="button" onClick={() => setIsPdfOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/15"><ExternalLink size={14} /> Preview PDFs</button>
             </div>
           </div>

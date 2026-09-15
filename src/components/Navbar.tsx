@@ -13,9 +13,10 @@ interface NavbarProps {
   theme: NavbarThemeAccent;
   onThemeChipClick: () => void;
   navLinks: Array<{ name: string; href: string }>;
+  activeHref?: string;
 }
 
-export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
+export const Navbar = ({ theme, onThemeChipClick, navLinks, activeHref }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -63,7 +64,10 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
               <a
                 key={link.name}
                 href={link.href}
-                className="nav-text theme-link-hover text-base font-medium text-slate-700 dark:text-white/70"
+                className={cn(
+                  'nav-text theme-link-hover text-base font-medium text-slate-700 dark:text-white/70',
+                  activeHref === link.href && 'text-neon-cyan dark:text-neon-cyan'
+                )}
               >
                 {link.name}
               </a>
@@ -111,7 +115,10 @@ export const Navbar = ({ theme, onThemeChipClick, navLinks }: NavbarProps) => {
               <a
                 key={link.name}
                 href={link.href}
-                className="nav-text text-lg font-medium text-slate-700 dark:text-white/70"
+                className={cn(
+                  'nav-text text-lg font-medium text-slate-700 dark:text-white/70',
+                  activeHref === link.href && 'text-neon-cyan dark:text-neon-cyan'
+                )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.name}
