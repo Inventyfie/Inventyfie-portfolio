@@ -384,11 +384,14 @@ export function calculateSampling(params: {
  */
 export function sampleOneToken(result: SamplingResult, randomValue?: number): {
   token: CalculatedTokenState;
+  randomVal: number;
   randomPercent: number;
+  intervalStart: number;
+  intervalEnd: number;
 } {
   const eligible = result.tokens.filter((t) => t.isEligible && t.finalProb > 0);
   if (eligible.length === 0) {
-    return { token: result.tokens[0], randomPercent: 0 };
+    return { token: result.tokens[0], randomVal: 0, randomPercent: 0, intervalStart: 0, intervalEnd: 100 };
   }
 
   // Sort eligible descending by final probability for stable sampling
@@ -397,16 +400,20 @@ export function sampleOneToken(result: SamplingResult, randomValue?: number): {
 
   let cumulative = 0;
   for (const token of sortedEligible) {
+    const prev = cumulative;
     cumulative += token.finalProb;
     if (r <= cumulative || token === sortedEligible[sortedEligible.length - 1]) {
       return {
         token,
+        randomVal: r,
         randomPercent: r * 100,
+        intervalStart: prev * 100,
+        intervalEnd: Math.min(100, cumulative * 100),
       };
     }
   }
 
-  return { token: sortedEligible[0], randomPercent: r * 100 };
+  return { token: sortedEligible[0], randomVal: r, randomPercent: r * 100, intervalStart: 0, intervalEnd: sortedEligible[0].finalProb * 100 };
 }
 
 /**

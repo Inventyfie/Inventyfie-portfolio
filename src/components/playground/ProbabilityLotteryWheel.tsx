@@ -77,13 +77,14 @@ export const ProbabilityLotteryWheel = ({
 
     // Pointer is at 12 o'clock (0 deg). To land on targetSlice, wheel must rotate such that
     // targetSlice.midAngle aligns with 0 deg.
-    // Randomize slightly within slice to be realistic
-    const jitter = (Math.random() - 0.5) * (targetSlice.sweepAngle * 0.7);
-    const landingAngle = targetSlice.midAngle + jitter;
+    const jitter = (Math.random() - 0.5) * (targetSlice.sweepAngle * 0.5);
+    const landingAngle = (targetSlice.midAngle + jitter + 360) % 360;
 
-    // Spin 4 to 6 full rotations (1440 - 2160 deg) minus landing angle
+    const desiredRotationMod = (360 - landingAngle) % 360;
+    const currentRotationMod = ((rotation % 360) + 360) % 360;
+    const deltaAngle = (desiredRotationMod - currentRotationMod + 360) % 360;
     const extraRotations = 360 * (5 + Math.floor(Math.random() * 2));
-    const targetRotation = rotation + extraRotations + (360 - (landingAngle % 360));
+    const targetRotation = rotation + extraRotations + (deltaAngle === 0 ? 360 : deltaAngle);
 
     setRotation(targetRotation);
 
