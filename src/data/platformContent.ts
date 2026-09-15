@@ -161,6 +161,7 @@ const baseMetadata = {
 };
 
 export const NAV_LINKS = [
+  { name: 'Home', href: '#home' },
   { name: 'Research', href: '#research' },
   { name: 'Tutorial', href: '#tutorial' },
   { name: 'Engineering', href: '#engineering' },
