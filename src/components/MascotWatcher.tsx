@@ -265,6 +265,20 @@ export const MascotWatcher: React.FC<MascotWatcherProps> = ({
   }, [mode, spawnFloatingNote]);
 
   useEffect(() => {
+    if (mode !== 'idle') {
+      return;
+    }
+
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning!' : hour < 18 ? 'Good afternoon!' : 'Good evening!';
+    const greetingTimer = window.setTimeout(() => {
+      spawnFloatingNote([greeting], -1, true);
+    }, 450);
+
+    return () => window.clearTimeout(greetingTimer);
+  }, [mode, spawnFloatingNote]);
+
+  useEffect(() => {
     const blinkInterval = window.setInterval(() => {
       setIsBlinking(true);
       blinkTimeoutRef.current = window.setTimeout(() => {
