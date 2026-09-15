@@ -17,7 +17,7 @@ export const Section = ({ children, id, className }: SectionProps) => {
       whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
       transition={prefersReducedMotion ? undefined : { duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className={className}
+      className={`scroll-mt-32 ${className ?? ''}`}
     >
       {children}
     </motion.section>
