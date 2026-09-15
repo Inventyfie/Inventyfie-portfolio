@@ -407,6 +407,7 @@ export default function App() {
 
   useEffect(() => {
     const hash = window.location.hash;
+    const isSharedTopic = (activePage === 'engineering' && activeEngineeringTopic) || (activePage === 'tutorial' && activeTutorialTopic);
     const targetId = activePage === 'engineering' && activeEngineeringTopic
       ? 'enterprise-rag-technical-knowledge-card'
       : activePage === 'tutorial' && activeTutorialTopic
@@ -416,7 +417,7 @@ export default function App() {
       : activePage;
 
     window.requestAnimationFrame(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: 'center' });
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: isSharedTopic ? 'center' : 'start' });
     });
   }, [activePage, activeEngineeringTopic, activeTutorialTopic]);
 
