@@ -619,49 +619,26 @@ const AUTO_GENERATED_CASE_STUDY_INDUSTRIES = [
 ];
 
 export const ABOUT_CONTENT = {
-  mission: 'We help teams turn AI ambition into an actionable adoption plan: choosing the right use cases, shaping the architecture, evaluating vendors, and preparing reliable workflows for production.',
-  vision: 'Inventyfie is building a practical AI decision partner where research, benchmarks, and implementation guidance make complex technology choices clearer, faster, and easier to defend.',
+  introduction: 'Inventyfie brings knowledge, exploration, and practical AI development together. We make complex ideas easier to understand and help turn that understanding into meaningful solutions.',
+  mission: 'Discover articles, tutorials, and practical insights that connect fundamental concepts with real-world applications. Our aim is to make useful knowledge approachable, engaging, and easier to put into practice.',
+  vision: 'Change an input, explore a possibility, and see how the outcome unfolds. Our learning experiences encourage curiosity and experimentation, helping ideas become clearer with every interaction.',
   researchPrinciples: [
-    'Evidence before opinion',
-    'Reproducible methodology',
-    'Operational realism over synthetic perfection',
-    'Transparent limitations and uncertainty',
+    'Curiosity, accessible knowledge, honest explanations, and responsible innovation. We aim to share both what works and where limitations remain, so understanding grows alongside possibility.',
   ],
   engineeringPrinciples: [
-    'Design for observability and failure recovery',
-    'Security and governance by default',
-    'Performance and cost measured continuously',
-    'Decision quality is a product feature',
+    'Start with a clear question. Explain the essentials. Explore how things work. Build with purpose. Whether sharing a concept or developing a solution, we value clarity, thoughtful experimentation, and practical relevance.',
   ],
-  publicationPhilosophy: 'We turn fast-moving AI ideas into useful guidance through focused experiments, honest comparisons, and implementation-ready recommendations.',
-  founderStory: 'Our next chapter is focused on richer benchmark dashboards, decision tools, and consultation pathways that help teams move from curiosity to confident execution.',
-  roadmap: [
-    'Interactive benchmark dashboards for sharper technology decisions',
-    'AI adoption playbooks tailored to real operational constraints',
-    'Consultation pathways for architecture, evaluation, and rollout planning',
-  ],
+  publicationPhilosophy: 'Move from an initial idea to a practical AI solution. We help identify useful opportunities, shape the technical approach, and develop applications that address real needs.',
 };
-
-const AUTO_GENERATED_FUTURE_MODULES = [
-  'Semantic Search',
-  'AI Chat Assistant',
-  'Research Recommendation Engine',
-  'Interactive Decision Frameworks',
-  'Community Contributions',
-  'Research Submission Portal',
-  'Newsletter',
-  'Annual Reports',
-  'Interactive Benchmarks',
-];
 
 export const TUTORIAL_ARTICLES: TutorialArticle[] = [
   {
     id: 'llm-temperature',
-    title: 'How LLM Temperature Works 🌡️',
-    subtitle: 'Explained in a 10-second animation',
-    summary: 'Temperature scales the model’s token scores before softmax converts them into probabilities. Lower temperature creates sharper probabilities and more predictable choices. With top-p fixed at 90%, the eligible token set shrinks from 5 to 3 to 1.',
-    video: '/llm_temperature_10s.mp4',
-    thumbnail: '/llm-temperature-thumbnail.png',
+    title: 'How AI Chooses Its Next Word: Temperature, Top-k and Top-p',
+    subtitle: 'Watch the animation.',
+    summary: 'Follow an animated experiment to discover how AI turns scores into chances - and how temperature, top-k, and top-p change which token gets picked.',
+    video: '/tpk_lab_explained.mp4',
+    thumbnail: '/images/tutorials/llm-temperature/hero.png',
     sections: [
       {
         title: 'Start with the next-token prediction',

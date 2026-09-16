@@ -1015,4 +1015,16 @@
       linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
     background-size: 40px 40px;
   }
+
+  [data-temperature-reader] aside {
+    max-height: 55vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  @media (min-width: 1024px) {
+    [data-temperature-reader] aside {
+      max-height: 70vh;
+    }
+  }
 }

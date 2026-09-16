@@ -39,6 +39,7 @@ import { SearchDocument, SearchExplorer } from './components/SearchExplorer';
 import { loadCmsEntries, saveCmsEntries } from './lib/cms';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
 import { EnterpriseRagCard } from './components/EnterpriseRagArticle';
+import { TemperatureTutorialCard } from './components/TemperatureTutorialArticle';
 import enterpriseRagArticle from './Engineering/data/enterprise-rag-technical-knowledge.json';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel').then((mod) => ({ default: mod.AdminPanel })));
@@ -802,7 +803,7 @@ export default function App() {
               </div>
 
               <div className="grid gap-6">
-                {TUTORIAL_ARTICLES.map((tutorial) => <TutorialCard key={tutorial.id} tutorial={tutorial} isSelected={activeTutorialTopic === tutorial.id} />)}
+                <TemperatureTutorialCard isSelected={activeTutorialTopic === 'llm-temperature'} />
               </div>
             </div>
           </Section>
@@ -925,38 +926,35 @@ export default function App() {
 
           <Section id="about" className="py-24 px-6">
             <div className="mx-auto max-w-7xl">
-              <div className="mb-16 text-center md:text-left">
+              <div className="mb-14 max-w-4xl text-center md:text-left">
                 <p className="mb-3 text-xs uppercase tracking-[0.2em] text-neon-cyan">Home / About</p>
-                <h2 className={sectionTitleClass}>About <span className="text-neon-cyan">Inventyfie</span></h2>
+                <h2 className="mb-5 font-display text-4xl font-bold text-white md:text-6xl">About <span className="text-neon-cyan">Inventyfie</span></h2>
+                <h3 className="mb-5 font-display text-2xl font-semibold text-white md:text-3xl">Explore ideas. Build understanding. Create possibilities.</h3>
+                <p className="max-w-3xl text-lg leading-relaxed text-white/85">{ABOUT_CONTENT.introduction}</p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <a href="#tutorial" className="accent-button inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-bold text-white">Explore &amp; Learn <ArrowRight size={16} className="ml-2" /></a>
+                  <a href="#contact" className="inline-flex items-center justify-center rounded-full border border-white/30 bg-slate-950/60 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-neon-cyan hover:text-neon-cyan">Discuss Your AI Project</a>
+                </div>
               </div>
 
               <div className="grid gap-6 lg:grid-cols-2">
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">How We Help</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.mission}</p>
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">What We Are Building</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.vision}</p>
+                <article className="glass rounded-3xl border border-white/20 bg-slate-950/70 p-6 shadow-xl backdrop-blur-md">
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-white">Knowledge Worth Sharing</h3>
+                  <p className="mb-6 text-base leading-relaxed text-white/80">{ABOUT_CONTENT.mission}</p>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-white">Understanding Through Exploration</h3>
+                  <p className="text-base leading-relaxed text-white/80">{ABOUT_CONTENT.vision}</p>
                 </article>
 
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Our Approach</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.publicationPhilosophy}</p>
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Coming Next</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.founderStory}</p>
+                <article className="glass rounded-3xl border border-white/20 bg-slate-950/70 p-6 shadow-xl backdrop-blur-md">
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-white">AI Consulting &amp; Development</h3>
+                  <p className="text-base leading-relaxed text-white/80">{ABOUT_CONTENT.publicationPhilosophy}</p>
                 </article>
 
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">What We Value</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.researchPrinciples.join(' · ')}</p>
-                  <h3 className="mb-3 mt-5 font-display text-2xl font-semibold text-slate-900 dark:text-white">How We Build</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.engineeringPrinciples.join(' · ')}</p>
-                </article>
-
-                <article className="glass rounded-3xl border border-white/10 p-6">
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Planned Capabilities</h3>
-                  <p className="mb-4 text-sm text-slate-700 dark:text-white/70">{ABOUT_CONTENT.roadmap.join(' · ')}</p>
-                  <h3 className="mb-3 font-display text-2xl font-semibold text-slate-900 dark:text-white">Future Modules</h3>
-                  <p className="text-sm text-slate-700 dark:text-white/70">Data will be added soon.</p>
+                <article className="glass rounded-3xl border border-white/20 bg-slate-950/70 p-6 shadow-xl backdrop-blur-md">
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-white">What We Value</h3>
+                  <p className="mb-6 text-base leading-relaxed text-white/80">{ABOUT_CONTENT.researchPrinciples[0]}</p>
+                  <h3 className="mb-3 font-display text-2xl font-semibold text-white">Our Approach</h3>
+                  <p className="text-base leading-relaxed text-white/80">{ABOUT_CONTENT.engineeringPrinciples[0]}</p>
                 </article>
               </div>
             </div>
