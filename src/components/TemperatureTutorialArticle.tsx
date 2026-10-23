@@ -482,7 +482,7 @@ export const TemperatureTutorialCard = ({ isSelected = false }: { isSelected?: b
                   <p className="text-xl leading-relaxed text-white/75">{ARTICLE.subtitle}</p>
 
                   {/* Interactive Playground Banner inside Article Reader */}
-                  <div className="mt-8 overflow-hidden rounded-3xl border border-neon-cyan/40 bg-gradient-to-r from-neon-cyan/15 via-black/40 to-neon-purple/20 p-6 md:p-8 shadow-[0_0_35px_rgba(0,242,255,0.15)]">
+                  <div className="mt-8 overflow-hidden rounded-3xl border border-white/15 bg-surface p-6 md:p-8">
                     <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                       <div className="space-y-2 max-w-2xl">
                         <div className="inline-flex items-center gap-2 rounded-full border border-neon-cyan/40 bg-neon-cyan/10 px-3 py-1 text-xs font-bold text-neon-cyan">

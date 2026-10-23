@@ -238,7 +238,7 @@ export const InteractivePlayground = ({ embedded = true }: InteractivePlayground
         </div>
 
         {/* Live Sentence Banner */}
-        <div className="rounded-2xl border border-white/15 bg-gradient-to-r from-black/60 via-slate-900/70 to-black/60 p-4 sm:p-5 shadow-inner">
+        <div className="rounded-2xl border border-white/15 bg-surface p-4 sm:p-5">
           <div className="flex items-center justify-between text-xs text-white/60 mb-1">
             <span className="uppercase tracking-wider font-semibold">
               Live Prompt & Chosen Next Word:

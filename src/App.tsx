@@ -4,13 +4,12 @@
  */
 
 import { createPortal } from 'react-dom';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { motion } from 'motion/react';
 import {
   ArrowRight,
   Brain,
   Check,
-  ChevronDown,
   Copy,
   Cpu,
   Github,
@@ -50,157 +49,69 @@ const EmptyState = () => (
   </div>
 );
 
-type BackgroundTheme = {
-  id: string;
-  label: string;
-  brandColor: string;
-  buttonFrom: string;
-  buttonTo: string;
-  buttonGlow: string;
-  highlightColor: string;
-  backdrop: string;
-  overlay: string;
-  spark: string;
-  orbA: string;
-  orbB: string;
-  gridOpacity: number;
-};
+const tileStroke = { stroke: 'currentColor', strokeOpacity: 0.6, strokeWidth: 1.2, fill: 'none' } as const;
 
-const BACKGROUND_THEMES: BackgroundTheme[] = [
+const HERO_TILES = [
   {
-    id: 'dynamic-orbit',
-    label: 'Dynamic Orbit',
-    brandColor: '#53eebe',
-    buttonFrom: '#53eebe',
-    buttonTo: '#ff7c6c',
-    buttonGlow: 'rgba(83, 238, 190, 0.46)',
-    highlightColor: '#53eebe',
-    backdrop: 'radial-gradient(circle at 18% 14%, #071b2d 0%, #05070f 54%, #030409 100%)',
-    overlay: 'radial-gradient(circle at 74% 26%, rgba(78, 255, 212, 0.2) 0%, rgba(78, 255, 212, 0) 55%), radial-gradient(circle at 24% 78%, rgba(255, 141, 112, 0.2) 0%, rgba(255, 141, 112, 0) 58%)',
-    spark: 'radial-gradient(circle at 52% 48%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 58%)',
-    orbA: 'radial-gradient(circle, rgba(83, 238, 190, 0.48) 0%, rgba(83, 238, 190, 0.2) 40%, rgba(83, 238, 190, 0) 75%)',
-    orbB: 'radial-gradient(circle, rgba(255, 124, 108, 0.45) 0%, rgba(255, 124, 108, 0.19) 40%, rgba(255, 124, 108, 0) 75%)',
-    gridOpacity: 0.22,
+    href: '#research',
+    index: '01',
+    label: 'Research',
+    color: '#e7dfcf',
+    text: '#1f1e1c',
+    art: (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="62" cy="44" r="12" {...tileStroke} />
+        <circle cx="62" cy="44" r="24" {...tileStroke} />
+        <circle cx="62" cy="44" r="36" {...tileStroke} />
+        <circle cx="62" cy="44" r="3" fill="currentColor" />
+      </svg>
+    ),
   },
   {
-    id: 'galaxy',
-    label: 'Galaxy',
-    brandColor: '#af78ff',
-    buttonFrom: '#af78ff',
-    buttonTo: '#57b2ff',
-    buttonGlow: 'rgba(175, 120, 255, 0.44)',
-    highlightColor: '#af78ff',
-    backdrop: 'radial-gradient(circle at 20% 20%, #2c0f4f 0%, #0c1027 45%, #02030a 100%)',
-    overlay: 'radial-gradient(circle at 72% 22%, rgba(161, 97, 255, 0.34) 0%, rgba(161, 97, 255, 0) 56%), radial-gradient(circle at 26% 76%, rgba(88, 166, 255, 0.24) 0%, rgba(88, 166, 255, 0) 56%)',
-    spark: 'radial-gradient(circle at 65% 18%, rgba(255, 244, 220, 0.3) 0%, rgba(255, 244, 220, 0) 26%), radial-gradient(circle at 40% 66%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 32%)',
-    orbA: 'radial-gradient(circle, rgba(175, 120, 255, 0.54) 0%, rgba(175, 120, 255, 0.2) 38%, rgba(175, 120, 255, 0) 76%)',
-    orbB: 'radial-gradient(circle, rgba(87, 178, 255, 0.48) 0%, rgba(87, 178, 255, 0.16) 38%, rgba(87, 178, 255, 0) 76%)',
-    gridOpacity: 0.17,
+    href: '#tutorial',
+    index: '02',
+    label: 'Tutorials',
+    color: '#c9d4c3',
+    text: '#1f1e1c',
+    art: (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        {[0, 1, 2, 3, 4].flatMap((row) =>
+          [0, 1, 2, 3, 4].map((col) => (
+            <circle key={`${row}-${col}`} cx={34 + col * 12} cy={18 + row * 12} r={row === col ? 3.2 : 1.6} fill="currentColor" fillOpacity={row === col ? 0.9 : 0.4} />
+          ))
+        )}
+      </svg>
+    ),
   },
   {
-    id: 'solar',
-    label: 'Solar',
-    brandColor: '#ffce5e',
-    buttonFrom: '#ffce5e',
-    buttonTo: '#ff624e',
-    buttonGlow: 'rgba(255, 206, 94, 0.44)',
-    highlightColor: '#ffce5e',
-    backdrop: 'radial-gradient(circle at 28% 18%, #5d2600 0%, #2b1300 30%, #090909 78%, #030303 100%)',
-    overlay: 'radial-gradient(circle at 74% 24%, rgba(255, 208, 106, 0.35) 0%, rgba(255, 208, 106, 0) 58%), radial-gradient(circle at 20% 78%, rgba(255, 98, 69, 0.25) 0%, rgba(255, 98, 69, 0) 58%)',
-    spark: 'radial-gradient(circle at 36% 24%, rgba(255, 240, 181, 0.25) 0%, rgba(255, 240, 181, 0) 24%)',
-    orbA: 'radial-gradient(circle, rgba(255, 206, 94, 0.58) 0%, rgba(255, 206, 94, 0.25) 40%, rgba(255, 206, 94, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(255, 98, 78, 0.5) 0%, rgba(255, 98, 78, 0.21) 40%, rgba(255, 98, 78, 0) 78%)',
-    gridOpacity: 0.2,
+    href: '#engineering',
+    index: '03',
+    label: 'Engineering',
+    color: '#e0b199',
+    text: '#1f1e1c',
+    art: (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <rect x="44" y="14" width="34" height="34" {...tileStroke} />
+        <polygon points="44,48 78,48 61,78" {...tileStroke} />
+        <line x1="44" y1="14" x2="61" y2="78" {...tileStroke} />
+        <line x1="78" y1="14" x2="61" y2="78" {...tileStroke} />
+      </svg>
+    ),
   },
   {
-    id: 'aurora',
-    label: 'Aurora',
-    brandColor: '#60fcd8',
-    buttonFrom: '#60fcd8',
-    buttonTo: '#6d81ff',
-    buttonGlow: 'rgba(96, 252, 216, 0.42)',
-    highlightColor: '#60fcd8',
-    backdrop: 'radial-gradient(circle at 50% 10%, #07313a 0%, #061620 45%, #03060c 100%)',
-    overlay: 'radial-gradient(circle at 76% 16%, rgba(64, 255, 207, 0.22) 0%, rgba(64, 255, 207, 0) 60%), radial-gradient(circle at 24% 78%, rgba(82, 122, 255, 0.18) 0%, rgba(82, 122, 255, 0) 60%)',
-    spark: 'radial-gradient(circle at 52% 20%, rgba(216, 255, 252, 0.14) 0%, rgba(216, 255, 252, 0) 32%)',
-    orbA: 'radial-gradient(circle, rgba(96, 252, 216, 0.54) 0%, rgba(96, 252, 216, 0.2) 38%, rgba(96, 252, 216, 0) 76%)',
-    orbB: 'radial-gradient(circle, rgba(109, 129, 255, 0.46) 0%, rgba(109, 129, 255, 0.18) 38%, rgba(109, 129, 255, 0) 76%)',
-    gridOpacity: 0.16,
-  },
-  {
-    id: 'nebula',
-    label: 'Nebula',
-    brandColor: '#ff83d6',
-    buttonFrom: '#ff83d6',
-    buttonTo: '#857cff',
-    buttonGlow: 'rgba(255, 131, 214, 0.42)',
-    highlightColor: '#ff83d6',
-    backdrop: 'radial-gradient(circle at 76% 18%, #31104a 0%, #170c2b 34%, #070712 78%, #020206 100%)',
-    overlay: 'radial-gradient(circle at 22% 20%, rgba(255, 139, 207, 0.24) 0%, rgba(255, 139, 207, 0) 54%), radial-gradient(circle at 72% 78%, rgba(136, 126, 255, 0.24) 0%, rgba(136, 126, 255, 0) 56%)',
-    spark: 'radial-gradient(circle at 58% 52%, rgba(255, 235, 255, 0.14) 0%, rgba(255, 235, 255, 0) 30%)',
-    orbA: 'radial-gradient(circle, rgba(255, 131, 214, 0.52) 0%, rgba(255, 131, 214, 0.2) 40%, rgba(255, 131, 214, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(133, 124, 255, 0.5) 0%, rgba(133, 124, 255, 0.18) 40%, rgba(133, 124, 255, 0) 78%)',
-    gridOpacity: 0.16,
-  },
-  {
-    id: 'eclipse',
-    label: 'Eclipse',
-    brandColor: '#ffb05d',
-    buttonFrom: '#588fff',
-    buttonTo: '#ffb05d',
-    buttonGlow: 'rgba(255, 176, 93, 0.4)',
-    highlightColor: '#ffb05d',
-    backdrop: 'radial-gradient(circle at 52% 26%, #111827 0%, #06070f 45%, #010102 100%)',
-    overlay: 'radial-gradient(circle at 54% 28%, rgba(255, 184, 110, 0.16) 0%, rgba(255, 184, 110, 0) 42%), radial-gradient(circle at 24% 74%, rgba(73, 126, 255, 0.2) 0%, rgba(73, 126, 255, 0) 56%)',
-    spark: 'radial-gradient(circle at 49% 24%, rgba(255, 233, 191, 0.17) 0%, rgba(255, 233, 191, 0) 24%)',
-    orbA: 'radial-gradient(circle, rgba(88, 143, 255, 0.5) 0%, rgba(88, 143, 255, 0.2) 40%, rgba(88, 143, 255, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(255, 176, 93, 0.48) 0%, rgba(255, 176, 93, 0.19) 40%, rgba(255, 176, 93, 0) 78%)',
-    gridOpacity: 0.14,
-  },
-  {
-    id: 'lunar',
-    label: 'Lunar',
-    brandColor: '#9ec5ff',
-    buttonFrom: '#9ec5ff',
-    buttonTo: '#d8ddff',
-    buttonGlow: 'rgba(158, 197, 255, 0.38)',
-    highlightColor: '#9ec5ff',
-    backdrop: 'radial-gradient(circle at 38% 12%, #1b2238 0%, #090b14 50%, #020306 100%)',
-    overlay: 'radial-gradient(circle at 78% 24%, rgba(210, 220, 255, 0.22) 0%, rgba(210, 220, 255, 0) 54%), radial-gradient(circle at 18% 72%, rgba(126, 162, 255, 0.2) 0%, rgba(126, 162, 255, 0) 58%)',
-    spark: 'radial-gradient(circle at 60% 28%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 28%)',
-    orbA: 'radial-gradient(circle, rgba(158, 197, 255, 0.48) 0%, rgba(158, 197, 255, 0.2) 40%, rgba(158, 197, 255, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(216, 221, 255, 0.44) 0%, rgba(216, 221, 255, 0.16) 40%, rgba(216, 221, 255, 0) 78%)',
-    gridOpacity: 0.15,
-  },
-  {
-    id: 'prism',
-    label: 'Prism',
-    brandColor: '#6fffd7',
-    buttonFrom: '#6fffd7',
-    buttonTo: '#ff7fd4',
-    buttonGlow: 'rgba(111, 255, 215, 0.4)',
-    highlightColor: '#6fffd7',
-    backdrop: 'radial-gradient(circle at 14% 16%, #12304a 0%, #0a1025 45%, #04040a 100%)',
-    overlay: 'radial-gradient(circle at 72% 20%, rgba(111, 255, 215, 0.2) 0%, rgba(111, 255, 215, 0) 58%), radial-gradient(circle at 26% 76%, rgba(255, 127, 212, 0.24) 0%, rgba(255, 127, 212, 0) 56%)',
-    spark: 'radial-gradient(circle at 52% 38%, rgba(255, 241, 255, 0.14) 0%, rgba(255, 241, 255, 0) 30%)',
-    orbA: 'radial-gradient(circle, rgba(111, 255, 215, 0.54) 0%, rgba(111, 255, 215, 0.2) 40%, rgba(111, 255, 215, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(255, 127, 212, 0.5) 0%, rgba(255, 127, 212, 0.18) 40%, rgba(255, 127, 212, 0) 78%)',
-    gridOpacity: 0.18,
-  },
-  {
-    id: 'abyss',
-    label: 'Abyss',
-    brandColor: '#36d4ff',
-    buttonFrom: '#36d4ff',
-    buttonTo: '#1f7dff',
-    buttonGlow: 'rgba(54, 212, 255, 0.42)',
-    highlightColor: '#36d4ff',
-    backdrop: 'radial-gradient(circle at 50% 6%, #052437 0%, #04101a 42%, #010205 100%)',
-    overlay: 'radial-gradient(circle at 80% 22%, rgba(54, 212, 255, 0.22) 0%, rgba(54, 212, 255, 0) 56%), radial-gradient(circle at 18% 82%, rgba(31, 125, 255, 0.22) 0%, rgba(31, 125, 255, 0) 58%)',
-    spark: 'radial-gradient(circle at 46% 34%, rgba(185, 235, 255, 0.12) 0%, rgba(185, 235, 255, 0) 28%)',
-    orbA: 'radial-gradient(circle, rgba(54, 212, 255, 0.52) 0%, rgba(54, 212, 255, 0.2) 40%, rgba(54, 212, 255, 0) 78%)',
-    orbB: 'radial-gradient(circle, rgba(31, 125, 255, 0.48) 0%, rgba(31, 125, 255, 0.18) 40%, rgba(31, 125, 255, 0) 78%)',
-    gridOpacity: 0.16,
+    href: '#case-studies',
+    index: '04',
+    label: 'Case studies',
+    color: '#c3cfd8',
+    text: '#1f1e1c',
+    art: (
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        {[14, 26, 38, 22, 46].map((height, i) => (
+          <rect key={i} x={30 + i * 11} y={62 - height} width="7" height={height} fill="currentColor" fillOpacity={0.3 + i * 0.14} />
+        ))}
+        <line x1="26" y1="62" x2="88" y2="62" {...tileStroke} />
+      </svg>
+    ),
   },
 ];
 
@@ -353,43 +264,11 @@ function TutorialCard({ tutorial, isSelected = false }: { tutorial: TutorialArti
 }
 
 export default function App() {
-  const [backgroundThemeIndex, setBackgroundThemeIndex] = useState(0);
   const [cmsEntries, setCmsEntries] = useState<CmsEntry[]>(() => loadCmsEntries());
   const [isAdminRoute, setIsAdminRoute] = useState(() => window.location.hash === '#admin');
   const [activePage, setActivePage] = useState<PageId>(() => pageFromHash(window.location.hash));
   const [activeEngineeringTopic, setActiveEngineeringTopic] = useState(() => engineeringTopicFromHash(window.location.hash));
   const [activeTutorialTopic, setActiveTutorialTopic] = useState(() => tutorialTopicFromHash(window.location.hash));
-
-  const chooseRandomThemeIndex = useCallback((current: number) => {
-    if (BACKGROUND_THEMES.length < 2) {
-      return current;
-    }
-
-    let next = current;
-    while (next === current) {
-      next = Math.floor(Math.random() * BACKGROUND_THEMES.length);
-    }
-    return next;
-  }, []);
-
-  const randomizeTheme = useCallback(() => {
-    setBackgroundThemeIndex((prev) => chooseRandomThemeIndex(prev));
-  }, [chooseRandomThemeIndex]);
-
-  useEffect(() => {
-    let cycleTimer = 0;
-
-    const scheduleNextTheme = () => {
-      const nextInMs = 10000 + Math.random() * 9000;
-      cycleTimer = window.setTimeout(() => {
-        setBackgroundThemeIndex((prev) => chooseRandomThemeIndex(prev));
-        scheduleNextTheme();
-      }, nextInMs);
-    };
-
-    scheduleNextTheme();
-    return () => window.clearTimeout(cycleTimer);
-  }, [chooseRandomThemeIndex]);
 
   useEffect(() => {
     saveCmsEntries(cmsEntries);
@@ -473,7 +352,6 @@ export default function App() {
     schemaNode.textContent = JSON.stringify(sectionSchema());
   }, []);
 
-  const activeBackgroundTheme = BACKGROUND_THEMES[backgroundThemeIndex] ?? BACKGROUND_THEMES[0];
   const heroInvestigation = RESEARCH_INVESTIGATIONS[0];
 
   const searchDocs = useMemo<SearchDocument[]>(() => {
@@ -580,160 +458,67 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <motion.div
-        className="relative min-h-screen overflow-x-hidden"
-        animate={
-          {
-            '--theme-brand-color': activeBackgroundTheme.brandColor,
-            '--theme-button-from': activeBackgroundTheme.buttonFrom,
-            '--theme-button-to': activeBackgroundTheme.buttonTo,
-            '--theme-button-glow': activeBackgroundTheme.buttonGlow,
-            '--theme-highlight-color': activeBackgroundTheme.highlightColor,
-          } as any
-        }
-        transition={{ duration: 3.2, ease: 'easeInOut' }}
-      >
-        <div className="fixed inset-0 z-0 overflow-hidden">
-          <AnimatePresence mode="sync">
-            <motion.div
-              key={`theme-backdrop-${activeBackgroundTheme.id}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2.8, ease: 'easeInOut' }}
-              className="absolute inset-0"
-              style={{ background: activeBackgroundTheme.backdrop }}
-            />
-          </AnimatePresence>
-
-          <AnimatePresence mode="sync">
-            <motion.div
-              key={`theme-overlay-${activeBackgroundTheme.id}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 3.2, ease: 'easeInOut' }}
-              className="absolute inset-0"
-              style={{ background: activeBackgroundTheme.overlay, mixBlendMode: 'screen' }}
-            />
-          </AnimatePresence>
-
-          <motion.div
-            className="neural-grid absolute inset-0"
-            animate={{ opacity: activeBackgroundTheme.gridOpacity }}
-            transition={{ duration: 2.6, ease: 'easeInOut' }}
-          />
-
-          <AnimatePresence mode="sync">
-            <motion.div
-              key={`theme-orbits-${activeBackgroundTheme.id}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2.8, ease: 'easeInOut' }}
-              className="absolute inset-0 pointer-events-none"
-            >
-              <div className="orb-orbit absolute inset-[-18%]">
-                <div
-                  className="orb-theme-blob absolute left-1/2 top-[3%] h-[72%] w-[72%] -translate-x-1/2 rounded-full blur-[112px]"
-                  style={{ background: activeBackgroundTheme.orbA }}
-                />
-              </div>
-              <div className="orb-orbit orb-orbit-opposite absolute inset-[-18%]">
-                <div
-                  className="orb-theme-blob absolute left-1/2 top-[3%] h-[72%] w-[72%] -translate-x-1/2 rounded-full blur-[112px]"
-                  style={{ background: activeBackgroundTheme.orbB }}
-                />
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          <AnimatePresence mode="sync">
-            <motion.div
-              key={`theme-spark-${activeBackgroundTheme.id}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 3.4, ease: 'easeInOut' }}
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: activeBackgroundTheme.spark }}
-            />
-          </AnimatePresence>
-        </div>
-
+      <div className="relative min-h-screen overflow-x-hidden bg-paper">
         <Navbar
-          theme={{
-            id: activeBackgroundTheme.id,
-            label: activeBackgroundTheme.label,
-          }}
-          onThemeChipClick={randomizeTheme}
           navLinks={NAV_LINKS}
           activeHref={activePage === 'engineering' ? '#engineering' : activePage === 'tutorial' ? '#tutorial' : activePage === 'research' ? '#research' : activePage === 'case-studies' ? '#case-studies' : '#home'}
         />
 
         <main className="relative z-10">
           <>
-          <section id="home" className={`${activePage === 'home' ? '' : 'hidden'} flex min-h-screen flex-col items-center justify-center px-6 pt-20 text-center`}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="eyebrow-badge mb-6 inline-flex items-center gap-2 rounded-full border border-neon-cyan/30 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-neon-cyan"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon-cyan opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-neon-cyan"></span>
-              </span>
-            AI Engineering Research Lab
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-              className="hero-title theme-text-primary mb-6 font-display text-5xl font-bold leading-[1.1] tracking-tight text-slate-900 dark:text-white md:text-8xl"
-            >
-              Inventyfie <br />
-              <span className="text-gradient">Research. Engineering. Practical AI.</span>
-            </motion.h1>
-
+          <section id="home" className={`${activePage === 'home' ? '' : 'hidden'} mx-auto flex min-h-[86vh] max-w-7xl flex-col justify-center px-6 pb-16 pt-36`}>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="hero-copy theme-text-secondary mx-auto mb-10 max-w-3xl text-lg text-slate-600 dark:text-white/60 md:text-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="mb-6 text-sm font-medium uppercase tracking-[0.18em] text-slate-500"
             >
-               AI Engineering Research Platform for practical investigations, decision intelligence frameworks, production architecture guides, and implementation-grade case studies.
+              Inventyfie · AI Engineering Research Lab
             </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col gap-4 sm:flex-row sm:gap-6"
+              transition={{ delay: 0.1, duration: 0.6 }}
+              className="hero-title max-w-5xl font-display text-4xl leading-[1.12] tracking-tight md:text-6xl"
             >
-              <a
-                href="#research"
-                className="accent-button group flex items-center gap-2 rounded-full px-8 py-4 font-bold text-white transition-all hover:shadow-[0_0_30px_rgba(0,242,255,0.5)]"
-                style={{ backgroundImage: 'linear-gradient(120deg, var(--theme-button-from), var(--theme-button-to))' }}
-              >
-                Explore Research
-                <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+              <span className="font-semibold">Practical AI engineering, tested and explained.</span>{' '}
+              <span className="font-light text-slate-500">
+                We publish benchmarks, case studies and architecture guides for teams building AI that has to work in production.
+              </span>
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.6 }}
+              className="mt-10 flex flex-wrap gap-3"
+            >
+              <a href="#research" className="accent-button group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium">
+                Explore research
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
-              <a className="secondary-button rounded-full border px-8 py-4 font-bold backdrop-blur-sm transition-all" href="#case-studies">
-                Browse Case Studies
-              </a>
-              <a className="secondary-button rounded-full border px-8 py-4 font-bold backdrop-blur-sm transition-all" href="#engineering">
-                Engineering Projects
+              <a className="secondary-button rounded-full border px-6 py-3 text-sm font-medium" href="#case-studies">
+                Browse case studies
               </a>
             </motion.div>
 
             <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-400 dark:text-white/30"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+              className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-4"
             >
-              <ChevronDown size={32} />
+              {HERO_TILES.map((tile) => (
+                <a key={tile.href} href={tile.href} className="hero-tile" style={{ backgroundColor: tile.color, color: tile.text }}>
+                  {tile.art}
+                  <span className="relative text-xs font-medium tracking-widest opacity-60">{tile.index}</span>
+                  <span className="relative flex items-end justify-between font-display text-xl font-medium">
+                    {tile.label}
+                    <ArrowRight size={18} />
+                  </span>
+                </a>
+              ))}
             </motion.div>
           </section>
 
@@ -782,7 +567,7 @@ export default function App() {
                         <p><strong>Related Research:</strong> {item.relatedResearch.join(' · ')}</p>
                         <div className="flex flex-wrap gap-3 pt-2">
                           <a href={item.github} target="_blank" rel="noreferrer" className="text-neon-cyan hover:underline">GitHub</a>
-                          <a href={item.downloads} className="text-neon-cyan hover:underline">Downloads</a>
+                          <a href={item.downloads} target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">Downloads</a>
                         </div>
                       </div>
                     </details>
@@ -982,13 +767,15 @@ export default function App() {
 
                 <div className="flex gap-6">
                   {[
-                    { icon: Linkedin, href: '#' },
+                    { icon: Linkedin, href: 'https://www.linkedin.com/company/inventyfie/?viewAsMember=true' },
                     { icon: Twitter, href: '#' },
                     { icon: Github, href: 'https://github.com/inventyfie' },
                   ].map((social, i) => (
                     <motion.a
                       key={i}
                       href={social.href}
+                      target={social.href.startsWith('http') ? '_blank' : undefined}
+                      rel="noopener noreferrer"
                       whileHover={{ scale: 1.2, rotate: 5 }}
                       className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 hover:border-neon-cyan hover:text-neon-cyan transition-colors"
                     >
@@ -1007,7 +794,7 @@ export default function App() {
             © 2026 INVENTYFIE RESEARCH LAB · AI ENGINEERING RESEARCH PLATFORM
           </p>
         </footer>
-      </motion.div>
+      </div>
     </ThemeProvider>
   );
 }

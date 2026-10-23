@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&display=swap');
+@import "tailwindcss";
+
+/* The site is a single light theme; `dark:` variants only apply under an explicit .dark class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Calm, paper-like palette. The original utilities were written for a dark UI
+ * (text-white, bg-white/5, border-white/10, neon accents). Re-pointing the
+ * palette tokens flips every one of them to ink-on-paper without touching markup:
+ *   white     -> ink    (text and hairline borders)
+ *   black     -> paper
+ *   slate-950 -> paper  (surfaces / text on filled accent buttons)
+ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
+
+  --color-paper: #f8f7f2;
+  --color-surface: #fffefb;
+  --color-ink: #1f1e1c;
+  --color-accent: #2d5a4a;
+
+  --color-obsidian: #f8f7f2;
+  --color-white: #1f1e1c;
+  --color-black: #f8f7f2;
+  --color-neon-cyan: #2d5a4a;
+  --color-neon-purple: #8a5a3c;
+
+  --color-slate-50: #f5f4ee;
+  --color-slate-100: #2b2a27;
+  --color-slate-200: #3a3935;
+  --color-slate-300: #55534e;
+  --color-slate-400: #77746d;
+  --color-slate-500: #6b6963;
+  --color-slate-600: #55534e;
+  --color-slate-700: #3a3935;
+  --color-slate-800: #2b2a27;
+  --color-slate-900: #1f1e1c;
+  --color-slate-950: #f8f7f2;
+
+  --color-gray-400: #77746d;
+  --color-gray-600: #55534e;
+  --color-gray-800: #2b2a27;
+
+  --color-emerald-200: #5f8577;
+  --color-emerald-300: #4a7466;
+  --color-emerald-400: #3b6355;
+  --color-emerald-500: #2d5a4a;
+  --color-cyan-200: #5f8577;
+  --color-cyan-300: #4a7466;
+  --color-cyan-400: #3b6355;
+  --color-cyan-500: #2d5a4a;
+  --color-teal-300: #4a7466;
+  --color-teal-400: #3b6355;
+  --color-teal-500: #2d5a4a;
+  --color-sky-300: #4a7466;
+  --color-sky-400: #3b6355;
+  --color-green-400: #3b6355;
+  --color-green-500: #2d5a4a;
+
+  --color-amber-200: #b8876a;
+  --color-amber-300: #a9714f;
+  --color-amber-400: #9a6342;
+  --color-amber-500: #8c5a3a;
+  --color-yellow-400: #9a6342;
+  --color-orange-400: #9a6342;
+  --color-orange-500: #8c5a3a;
+
+  --color-red-200: #c06a5f;
+  --color-red-300: #b4483c;
+  --color-red-400: #b4483c;
+  --color-red-500: #a63d32;
+  --color-rose-200: #c06a5f;
+  --color-rose-300: #b4483c;
+  --color-rose-400: #b4483c;
+  --color-rose-500: #a63d32;
+
+  --color-purple-300: #6b6963;
+  --color-purple-400: #5b5953;
+  --color-purple-500: #4a4843;
+  --color-fuchsia-400: #5b5953;
+  --color-fuchsia-500: #4a4843;
+  --color-violet-400: #5b5953;
+  --color-indigo-400: #5b5953;
+  --color-blue-600: #3a3935;
+  --color-blue-900: #2b2a27;
+}
+
+@layer base {
+  html {
+    font-size: 17px;
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+
+  ::selection {
+    background: rgba(45, 90, 74, 0.18);
+  }
+
+  button,
+  [role='button'],
+  a[href],
+  input[type='button'],
+  input[type='submit'] {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Flat surfaces: no blur, glow or gradients */
+  .glass,
+  .readable-surface {
+    background: var(--color-surface);
+    border-color: rgba(31, 30, 28, 0.1);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .section-panel {
+    background: transparent;
+    border-color: rgba(31, 30, 28, 0.1);
+    box-shadow: none;
+  }
+
+  .nav-surface {
+    background: rgba(248, 247, 242, 0.92);
+    border-bottom: 1px solid rgba(31, 30, 28, 0.08);
+    backdrop-filter: blur(8px);
+  }
+
+  .hero-title,
+  .theme-text-primary {
+    color: var(--color-ink);
+  }
+
+  .hero-copy,
+  .theme-text-secondary {
+    color: #55534e;
+  }
+
+  .theme-text-muted {
+    color: #77746d;
+  }
+
+  .nav-text {
+    color: #55534e;
+  }
+
+  .accent-button {
+    background: var(--color-ink) !important;
+    color: var(--color-paper) !important;
+    box-shadow: none !important;
+    transition: background-color 200ms ease;
+  }
+
+  .accent-button:hover {
+    background: var(--color-accent) !important;
+  }
+
+  /* Remove leftover neon glows hard-coded in component classes */
+  [class*="0,242,255"] {
+    box-shadow: none !important;
+  }
+
+  .secondary-button {
+    color: var(--color-ink);
+    background: transparent;
+    border-color: rgba(31, 30, 28, 0.2);
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  .secondary-button:hover {
+    background: rgba(31, 30, 28, 0.05);
+    border-color: rgba(31, 30, 28, 0.4);
+  }
+
+  .eyebrow-badge {
+    background: transparent;
+    border-color: rgba(31, 30, 28, 0.15);
+    color: #55534e;
+  }
+
+  .icon-well {
+    background: rgba(31, 30, 28, 0.05);
+    border: 1px solid rgba(31, 30, 28, 0.08);
+    box-shadow: none;
+  }
+
+  .tag-chip {
+    background: rgba(31, 30, 28, 0.04);
+    border-color: rgba(31, 30, 28, 0.1);
+    color: #55534e;
+  }
+
+  .theme-link-hover {
+    transition: color 200ms ease;
+  }
+
+  .theme-link-hover:hover {
+    color: var(--color-ink);
+  }
+
+  .theme-card-hover {
+    transition: border-color 200ms ease, background-color 200ms ease;
+  }
+
+  .theme-card-hover:hover {
+    border-color: rgba(31, 30, 28, 0.35);
+  }
+
+  .theme-title-hover,
+  .theme-arrow-hover {
+    transition: color 200ms ease;
+  }
+
+  .group:hover .theme-title-hover,
+  .group:hover .theme-arrow-hover {
+    color: var(--color-accent);
+  }
+
+  .text-gradient {
+    color: #55534e;
+    font-weight: 400;
+  }
+
+  .neon-glow {
+    box-shadow: none;
+  }
+
+  /* Pill navigation */
+  .nav-pill {
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    padding: 0.35rem 0.95rem;
+    font-size: 0.9rem;
+    color: var(--color-ink);
+    background: rgba(31, 30, 28, 0.05);
+    transition: background-color 200ms ease;
+  }
+
+  .nav-pill:hover {
+    background: rgba(31, 30, 28, 0.1);
+  }
+
+  .nav-pill[aria-current='page'] {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  /* Hero tiles; icon artwork uses currentColor */
+  .hero-tile {
+    position: relative;
+    display: flex;
+    aspect-ratio: 1 / 1;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    border-radius: 0.25rem;
+    padding: 1.1rem;
+    transition: transform 250ms ease;
+  }
+
+  .hero-tile:hover {
+    transform: translateY(-4px);
+  }
+
+  .hero-tile svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@layer utilities {
+  .article-reading-text {
+    font-family: "Abadi", Arial, sans-serif;
+  }
+
+  .article-reading-text article p,
+  .article-reading-text article li {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.55;
+  }
+
+  .article-reading-text article h3 {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+
+  .article-reading-text article h4 {
+    font-size: 20px;
+    line-height: 1.35;
+  }
+
+  .article-reading-text figcaption {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  [data-temperature-reader] aside {
+    max-height: 55vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  @media (min-width: 1024px) {
+    [data-temperature-reader] aside {
+      max-height: 70vh;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
