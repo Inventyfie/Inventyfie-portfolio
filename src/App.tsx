@@ -513,7 +513,7 @@ export default function App() {
                 <a key={tile.href} href={tile.href} className="hero-tile" style={{ backgroundColor: tile.color, color: tile.text }}>
                   {tile.art}
                   <span className="relative text-xs font-medium tracking-widest opacity-60">{tile.index}</span>
-                  <span className="relative flex items-end justify-between font-display text-xl font-medium">
+                  <span className="relative flex items-end justify-between font-display text-base font-medium sm:text-xl">
                     {tile.label}
                     <ArrowRight size={18} />
                   </span>
@@ -522,7 +522,7 @@ export default function App() {
             </motion.div>
           </section>
 
-          <Section id="search" className={`${activePage === 'home' ? '' : 'hidden'} px-6 pb-12 pt-12 md:pt-16`}>
+          <Section id="search" className={`${activePage === 'home' ? '' : 'hidden'} px-4 sm:px-6 pb-12 pt-12 md:pt-16`}>
             <div className="mx-auto max-w-7xl">
               <SearchExplorer docs={searchDocs} cmsEntries={cmsEntries} />
             </div>
@@ -746,26 +746,26 @@ export default function App() {
           </Section>
 
           <Section id="contact" className="py-24 px-6">
-            <div className="mx-auto max-w-4xl glass section-panel rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
+            <div className="mx-auto max-w-4xl glass section-panel rounded-3xl p-6 sm:p-12 md:p-20 text-center relative overflow-hidden">
               <div className="absolute -right-20 -bottom-20 h-64 w-64 rounded-full bg-neon-purple/20 blur-[100px]" />
               <h2 className="theme-text-primary mb-6 font-display text-4xl font-bold md:text-7xl text-slate-900 dark:text-white">
                 Contact <br />
                 <span className="text-neon-cyan">Research Team</span>
               </h2>
-              <p className="theme-text-secondary mb-12 text-slate-600 dark:text-white/60 text-lg">
+              <p className="theme-text-secondary mb-10 text-slate-600 dark:text-white/60 text-base md:text-lg">
                 For collaboration, enterprise research programs, benchmark requests, publication partnerships, or technical inquiry.
               </p>
 
               <div className="flex flex-col items-center gap-8">
                 <a
                   href="mailto:inventyfie@gmail.com?subject=Inventyfie%20Enquiry"
-                  className="theme-text-primary group flex items-center gap-4 text-2xl font-bold text-slate-900 dark:text-white hover:text-neon-cyan transition-colors md:text-4xl"
+                  className="theme-text-primary group flex max-w-full items-center gap-3 break-all text-lg font-bold text-slate-900 dark:text-white hover:text-neon-cyan transition-colors sm:text-2xl md:text-4xl"
                 >
-                  <Mail size={32} />
+                  <Mail className="h-6 w-6 shrink-0 md:h-8 md:w-8" />
                   inventyfie@gmail.com
                 </a>
 
-                <div className="flex gap-6">
+                <div className="flex gap-4 sm:gap-6">
                   {[
                     { icon: Linkedin, href: 'https://www.linkedin.com/company/inventyfie/?viewAsMember=true' },
                     { icon: Twitter, href: '#' },
@@ -777,7 +777,7 @@ export default function App() {
                       target={social.href.startsWith('http') ? '_blank' : undefined}
                       rel="noopener noreferrer"
                       whileHover={{ scale: 1.2, rotate: 5 }}
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-white/60 hover:border-neon-cyan hover:text-neon-cyan transition-colors"
+                      className="flex h-12 w-12 items-center justify-center rounded-full border border-[#1f1e1c]/20 bg-[#1f1e1c]/5 text-[#1f1e1c] hover:border-neon-cyan hover:text-neon-cyan transition-colors"
                     >
                       <social.icon size={20} />
                     </motion.a>
